@@ -76,12 +76,19 @@ public class UI extends Application {
 
 		browseDir.setOnAction((ae) -> {
 			DirectoryChooser directorychoser = new DirectoryChooser();
-			File tempfile;
-			tempfile = directorychoser.showDialog(stage);
-			labelPath.setText("COMPRESSING...");
+
+			File tempfile = directorychoser.showDialog(stage);
+			labelPath.setText("COMPRESSING " + tempfile.getPath());
 			Compress.zip(tempfile.getPath(), tempfile.getPath() + ".zip", "");
-			tempfile = new File(tempfile.getPath() + ".zip", "");
+			labelPath.setText("COMPRESSING DONE");
+			tempfile = new File(tempfile.getPath() + ".zip");
 			client.file = tempfile;
+			System.out.println(client.file.getPath());
+			client.filename = tempfile.getName();
+			System.out.println(client.filename);
+			client.fileLength = tempfile.length();
+			System.out.println(client.fileLength);
+
 			browseFile.setDisable(true);
 		});
 
