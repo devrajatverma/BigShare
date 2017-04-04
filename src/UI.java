@@ -8,7 +8,6 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.Separator;
 import javafx.scene.effect.InnerShadow;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
@@ -83,12 +82,8 @@ public class UI extends Application {
 			labelPath.setText("COMPRESSING DONE");
 			tempfile = new File(tempfile.getPath() + ".zip");
 			client.file = tempfile;
-			System.out.println(client.file.getPath());
 			client.filename = tempfile.getName();
-			System.out.println(client.filename);
 			client.fileLength = tempfile.length();
-			System.out.println(client.fileLength);
-
 			browseFile.setDisable(true);
 		});
 
@@ -97,10 +92,7 @@ public class UI extends Application {
 			client.send(progressBar, progressIndicator);
 		});
 
-		Separator separator = new Separator();
-		separator.autosize();
-
-		rootSend.getChildren().addAll(instruction, labelPath, separator, browseFile, browseDir, btnSendNow, progressBar,
+		rootSend.getChildren().addAll(instruction, labelPath, browseFile, browseDir, btnSendNow, progressBar,
 				progressIndicator);
 		// ------------receive---------
 		stage.setScene(home);

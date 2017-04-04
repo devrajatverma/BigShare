@@ -46,7 +46,6 @@ public class ServerClass {
 			} catch (IOException e) {
 				System.out.println("error while reading filename and size");
 			}
-			System.out.println(filename + "\n" + fileLength); // Test
 
 			try {
 				out = new FileOutputStream("C:\\Users\\RAJAT VERMA\\Desktop\\receiver\\" + filename);
