@@ -8,25 +8,31 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ServerClass {
-	static ServerSocket serverSocket = null;
-	static Socket socket = null;
-	static File receivedzip = null;
-	static InputStream in = null;
-	static OutputStream out = null;
-	static String filename = null;
-	static long fileLength = 0L;
-	static byte[] bytes = new byte[8192]; // 1 mb buffer
-	static long status = 0L;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 
-	public static void main(String[] args) throws IOException {
+public class ServerClass implements Runnable {
+
+	ServerSocket serverSocket = null;
+	Socket socket = null;
+	File receivedzip = null;
+	File destpath = null;
+	InputStream in = null;
+	OutputStream out = null;
+	String filename = null;
+	long fileLength = 0L;
+	long status = 0L;
+	ProgressBar bar = null;
+	ProgressIndicator indicator = null;
+
+	@Override
+	public void run() {
 		try {
 			try {
-				serverSocket = new ServerSocket(2001);
+				serverSocket = new ServerSocket(2005);
 			} catch (IOException ex) {
 				System.out.println("Can't setup server on this port number. ");
 			}
-
 			try {
 				socket = serverSocket.accept();
 			} catch (IOException ex) {
@@ -48,18 +54,20 @@ public class ServerClass {
 			} catch (IOException e) {
 				System.out.println("error while reading filename and size");
 			}
-			receivedzip = new File("C:\\Users\\RAJAT VERMA\\Desktop\\receiver\\" + filename);
+			receivedzip = new File(destpath.getPath() + "\\" + filename);
 			try {
 				out = new FileOutputStream(receivedzip);
 			} catch (FileNotFoundException ex) {
 				System.out.println("File not found. ");
 			}
 
+			byte[] bytes = new byte[8192]; // 1 mb buffer
 			int count;
 			while ((count = in.read(bytes)) > 0) {
 				out.write(bytes, 0, count);
 				status += count;
-				System.out.println((status / fileLength) * 100 + "%" + " Received");
+				bar.setProgress((status / fileLength) * 100D);
+				indicator.setProgress((status / fileLength) * 100D);
 			}
 			if (receivedzip.getName().endsWith(".zip")) {
 				System.out.println("Decompressing...");
@@ -67,17 +75,38 @@ public class ServerClass {
 						"C:\\Users\\RAJAT VERMA\\Desktop\\receiver\\", "");
 			}
 
+		} catch (IOException e) {
+			System.out.println("Error occured in while loop in reading from socket and writing to file");
 		} finally {
-			if (out != null)
-				out.close();
-			if (in != null)
-				in.close();
 			if (socket != null)
-				socket.close();
+				try {
+					socket.close();
+				} catch (IOException e) {
+					System.out.println("Error while closing socket");
+				}
 			if (serverSocket != null)
-				serverSocket.close();
+				try {
+					serverSocket.close();
+				} catch (IOException e) {
+					System.out.println("Error while closing ServerSocket");
+				}
+
+			if (out != null)
+				try {
+					out.close();
+				} catch (IOException e) {
+					System.out.println("Eoor while closing out stream");
+				}
+			if (in != null)
+				try {
+					in.close();
+				} catch (IOException e) {
+					System.out.println("Error while closing in socket stream");
+				}
+
 			if (receivedzip.getName().endsWith(".zip"))
 				receivedzip.delete();
 		}
 	}
+
 }

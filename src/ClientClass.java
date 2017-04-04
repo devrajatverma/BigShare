@@ -21,10 +21,9 @@ public class ClientClass {
 	long fileLength = 0L;
 
 	public void send(ProgressBar bar, ProgressIndicator indicator) {
-		host = "127.0.0.1";
 		try {
 			try {
-				socket = new Socket(host, 2001);
+				socket = new Socket(host, 2005);
 			} catch (UnknownHostException e) {
 				System.out.println("UnknownHostException Occured");
 			} catch (IOException e) {
