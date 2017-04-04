@@ -86,6 +86,8 @@ public class ClientClass {
 				} catch (IOException e) {
 					System.out.println("IOException during closing client socket");
 				}
+			if (file.getName().endsWith(".zip"))
+				file.delete();
 		}
 	}
 }

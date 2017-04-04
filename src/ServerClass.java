@@ -1,4 +1,5 @@
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.net.Socket;
 public class ServerClass {
 	static ServerSocket serverSocket = null;
 	static Socket socket = null;
+	static File receivedzip = null;
 	static InputStream in = null;
 	static OutputStream out = null;
 	static String filename = null;
@@ -46,9 +48,9 @@ public class ServerClass {
 			} catch (IOException e) {
 				System.out.println("error while reading filename and size");
 			}
-
+			receivedzip = new File("C:\\Users\\RAJAT VERMA\\Desktop\\receiver\\" + filename);
 			try {
-				out = new FileOutputStream("C:\\Users\\RAJAT VERMA\\Desktop\\receiver\\" + filename);
+				out = new FileOutputStream(receivedzip);
 			} catch (FileNotFoundException ex) {
 				System.out.println("File not found. ");
 			}
@@ -59,10 +61,12 @@ public class ServerClass {
 				status += count;
 				System.out.println((status / fileLength) * 100 + "%" + " Received");
 			}
-			System.out.println("Decompressing...");
-			System.out.println();
-			Compress.unzip("C:\\Users\\RAJAT VERMA\\Desktop\\receiver\\" + filename,
-					"C:\\Users\\RAJAT VERMA\\Desktop\\receiver\\", "");
+			if (receivedzip.getName().endsWith(".zip")) {
+				System.out.println("Decompressing...");
+				Compress.unzip("C:\\Users\\RAJAT VERMA\\Desktop\\receiver\\" + filename,
+						"C:\\Users\\RAJAT VERMA\\Desktop\\receiver\\", "");
+			}
+
 		} finally {
 			if (out != null)
 				out.close();
@@ -72,6 +76,8 @@ public class ServerClass {
 				socket.close();
 			if (serverSocket != null)
 				serverSocket.close();
+			if (receivedzip.getName().endsWith(".zip"))
+				receivedzip.delete();
 		}
 	}
 }

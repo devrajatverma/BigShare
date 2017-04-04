@@ -67,24 +67,32 @@ public class UI extends Application {
 		Button browseDir = new Button("Browse Directory to be sent");
 		Button browseFile = new Button("Browse File to be sent");
 		browseFile.setOnAction((ae) -> {
-			FileChooser fileChooser = new FileChooser();
-			client.file = fileChooser.showOpenDialog(stage);
-			labelPath.setText(client.file.getPath());
-			browseDir.setDisable(true);
+			FileChooser fileChoser = new FileChooser();
+			File tempfile = fileChoser.showOpenDialog(stage);
+
+			if (tempfile != null) {
+				labelPath.setText(tempfile.getAbsolutePath());
+				client.file = tempfile;
+				client.filename = tempfile.getName();
+				client.fileLength = tempfile.length();
+				browseDir.setDisable(true);
+			}
 		});
 
 		browseDir.setOnAction((ae) -> {
 			DirectoryChooser directorychoser = new DirectoryChooser();
-
 			File tempfile = directorychoser.showDialog(stage);
-			labelPath.setText("COMPRESSING " + tempfile.getPath());
-			Compress.zip(tempfile.getPath(), tempfile.getPath() + ".zip", "");
-			labelPath.setText("COMPRESSING DONE");
-			tempfile = new File(tempfile.getPath() + ".zip");
-			client.file = tempfile;
-			client.filename = tempfile.getName();
-			client.fileLength = tempfile.length();
-			browseFile.setDisable(true);
+
+			if (tempfile != null) {
+				labelPath.setText("COMPRESSING " + tempfile.getPath());
+				Compress.zip(tempfile.getPath(), tempfile.getPath() + ".zip", "");
+				labelPath.setText("COMPRESSING DONE");
+				tempfile = new File(tempfile.getPath() + ".zip");
+				client.file = tempfile;
+				client.filename = tempfile.getName();
+				client.fileLength = tempfile.length();
+				browseFile.setDisable(true);
+			}
 		});
 
 		Button btnSendNow = new Button("Send");
@@ -95,6 +103,7 @@ public class UI extends Application {
 		rootSend.getChildren().addAll(instruction, labelPath, browseFile, browseDir, btnSendNow, progressBar,
 				progressIndicator);
 		// ------------receive---------
+
 		stage.setScene(home);
 		stage.show();
 	}
@@ -102,5 +111,4 @@ public class UI extends Application {
 	public static void main(String[] args) {
 		launch(args);
 	}
-
 }
