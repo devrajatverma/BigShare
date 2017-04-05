@@ -8,9 +8,6 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
-
 public class ClientClass {
 	Socket socket;
 	String host;
@@ -20,7 +17,7 @@ public class ClientClass {
 	String filename = null;
 	long fileLength = 0L;
 
-	public void send(ProgressBar bar, ProgressIndicator indicator) {
+	public void send() {
 		try {
 			try {
 				socket = new Socket(host, 2000);
@@ -59,8 +56,8 @@ public class ClientClass {
 				while ((count = in.read(bytes)) > 0) {
 					out.write(bytes, 0, count);
 					status += count;
-					bar.setProgress(status / fileLength);
-					indicator.setProgress(status / fileLength);
+					UI.barC = status / fileLength;
+					UI.indicatorC = status / fileLength;
 				}
 			} catch (IOException e) {
 				System.out.println("IOException during Reading form socket/Writing writing to file in client class");

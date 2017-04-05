@@ -24,6 +24,7 @@ import javafx.stage.Stage;
 
 public class UI extends Application {
 	static double bar = 0, indicator = 0;
+	static double barC = 0, indicatorC = 0;
 
 	@Override
 	public void start(Stage stage) {
@@ -61,6 +62,13 @@ public class UI extends Application {
 		btnSend.setEffect(innerShadow);
 		btnSend.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnSend.setOnAction((ae) -> {
+			new Thread(() -> {
+				while (true) {
+					progressBarClient.setProgress(barC);
+					progressIndicatorClient.setProgress(indicatorC);
+				}
+			}, "clientBar&IndicatorUpdator").start();
+
 			stage.setScene(send);
 			stage.show();
 		});
@@ -77,6 +85,7 @@ public class UI extends Application {
 			}, "serverBar&IndicatorUpdator").start();
 
 			new Thread(() -> server.activate(progressBarServer, progressIndicatorServer), "activate").start();
+
 			stage.setScene(receive);
 			stage.show();
 
@@ -126,7 +135,9 @@ public class UI extends Application {
 		Button btnSendNow = new Button("Send");
 		btnSendNow.setOnAction((ae) -> {
 			client.host = serverAddressTaker.getText();
-			client.send(progressBarClient, progressIndicatorClient);
+			new Thread(() -> {
+				client.send();
+			}, "Client.send()").start();
 		});
 
 		Label labelServerAddress = new Label("Enter The Address of Server");
