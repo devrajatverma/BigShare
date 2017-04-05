@@ -23,7 +23,7 @@ public class ClientClass {
 	public void send(ProgressBar bar, ProgressIndicator indicator) {
 		try {
 			try {
-				socket = new Socket(host, 2005);
+				socket = new Socket(host, 2000);
 			} catch (UnknownHostException e) {
 				System.out.println("UnknownHostException Occured");
 			} catch (IOException e) {
@@ -59,8 +59,8 @@ public class ClientClass {
 				while ((count = in.read(bytes)) > 0) {
 					out.write(bytes, 0, count);
 					status += count;
-					bar.setProgress((status / fileLength) * 100D);
-					indicator.setProgress((status / fileLength) * 100D);
+					bar.setProgress(status / fileLength);
+					indicator.setProgress(status / fileLength);
 				}
 			} catch (IOException e) {
 				System.out.println("IOException during Reading form socket/Writing writing to file in client class");
@@ -88,5 +88,30 @@ public class ClientClass {
 			if (file.getName().endsWith(".zip"))
 				file.delete();
 		}
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		if (out != null)
+			try {
+				out.close();
+			} catch (IOException e) {
+				System.out.println("IOException during cloasing out stream");
+			}
+		if (in != null)
+			try {
+				in.close();
+			} catch (IOException e) {
+				System.out.println("IOException during closing in stream");
+			}
+		if (socket != null)
+			try {
+				socket.close();
+			} catch (IOException e) {
+				System.out.println("IOException during closing client socket");
+			}
+		if (file.getName().endsWith(".zip"))
+			file.delete();
+		super.finalize();
 	}
 }

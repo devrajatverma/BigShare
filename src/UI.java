@@ -1,6 +1,6 @@
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import javafx.application.Application;
 import javafx.geometry.Pos;
@@ -23,17 +23,18 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class UI extends Application {
+	ProgressBar progressBarServer = null;
+	ProgressIndicator progressIndicatorServer = null;
 
 	@Override
 	public void start(Stage stage) {
 		ProgressBar progressBarClient = new ProgressBar();
 		ProgressIndicator progressIndicatorClient = new ProgressIndicator();
-		ProgressBar progressBarServer = new ProgressBar();
-		ProgressIndicator progressIndicatorServer = new ProgressIndicator();
+		progressBarServer = new ProgressBar();
+		progressIndicatorServer = new ProgressIndicator();
 		stage.setTitle("BIG SHARE");
 		ClientClass client = new ClientClass();
 		ServerClass server = new ServerClass();
-		Thread serverThread = new Thread(server, "server");
 
 		Scene home;
 		FlowPane rootHome = new FlowPane(10, 10);
@@ -43,15 +44,17 @@ public class UI extends Application {
 		stage.show();
 
 		FlowPane rootSend = new FlowPane(10, 10);
-		rootSend.setAlignment(Pos.CENTER);
-		Scene send = new Scene(rootSend, 400, 400);
+		rootSend.setAlignment(Pos.TOP_CENTER);
+		Scene send = new Scene(rootSend, 400, 200);
 
 		FlowPane rootReceive = new FlowPane();
-		rootReceive.setAlignment(Pos.CENTER);
-		Scene receive = new Scene(rootReceive, 400, 400);
+		rootReceive.setAlignment(Pos.TOP_CENTER);
+		Scene receive = new Scene(rootReceive, 600, 400);
 		InnerShadow innerShadow = new InnerShadow(8.0, Color.AQUA);
-		Separator separator = new Separator();
-		separator.setPrefWidth(400);
+		Separator separatorSend = new Separator();
+		separatorSend.setPrefWidth(400);
+		Separator separatorReceive = new Separator();
+		separatorReceive.setPrefWidth(600);
 		// -----------------home------------------------
 
 		Button btnSend = new Button("Send Mode", new ImageView("send.png"));
@@ -61,7 +64,6 @@ public class UI extends Application {
 			stage.setScene(send);
 			stage.show();
 		});
-		rootHome.getChildren().add(btnSend);
 
 		Button btnReceive = new Button("Receive Mode", new ImageView("receive.png"));
 		btnReceive.setEffect(innerShadow);
@@ -69,14 +71,14 @@ public class UI extends Application {
 		btnReceive.setOnAction((ae) -> {
 			stage.setScene(receive);
 			stage.show();
-			server.bar = progressBarServer;
-			server.indicator = progressIndicatorClient;
-			serverThread.start();
+			server.activate(progressBarServer, progressIndicatorServer);
 		});
-		rootHome.getChildren().add(btnReceive);
+
+		rootHome.getChildren().addAll(btnSend, btnReceive);
 
 		// ------------send-----------
-		TextField serverAddressTaker = new TextField();
+		TextField serverAddressTaker = new TextField("192.168.0.100");
+
 		serverAddressTaker.setPrefSize(150, 0);
 
 		Text instruction = new Text("Either Chose file OR directory");
@@ -123,11 +125,15 @@ public class UI extends Application {
 
 		rootSend.getChildren().addAll(labelServerAddress, serverAddressTaker, instruction, labelPath, browseFile,
 				browseDir, btnSendNow, progressBarClient, progressIndicatorClient);
-		// ------------receive---------
+
+		// ------------receive-------------------------------------------
+
 		Text info = null;
+		Label labelDestinationPath = new Label();
 		try {
-			info = new Text("Tell This Address to Sender " + InetAddress.getLocalHost().getHostAddress());
-		} catch (UnknownHostException e) {
+			info = new Text("Local Address " + InetAddress.getLocalHost().getHostAddress().toString()
+					+ "|| External Address " + server.getIp());
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		info.setFont(new Font(20));
@@ -136,11 +142,26 @@ public class UI extends Application {
 		btnDestPath.setOnAction((ae) -> {
 			DirectoryChooser destinationDirectoryChoser = new DirectoryChooser();
 			server.destpath = destinationDirectoryChoser.showDialog(stage);
+			labelDestinationPath.setText(server.destpath.getPath());
 		});
 
-		rootReceive.getChildren().addAll(info, separator, btnDestPath, progressBarServer, progressIndicatorServer);
+		rootReceive.getChildren().addAll(info, separatorReceive, labelDestinationPath, btnDestPath, progressBarServer,
+				progressIndicatorServer);
 		// -------------------------------------------------------------
-
+		stage.setOnCloseRequest((ae) -> {
+			if (server.socket != null)
+				try {
+					server.socket.close();
+				} catch (IOException e) {
+					System.out.println("Error while closing socket");
+				}
+			if (server.serverSocket != null)
+				try {
+					server.serverSocket.close();
+				} catch (IOException e) {
+					System.out.println("Error while closing ServerSocket");
+				}
+		});
 	}
 
 	public static void main(String[] args) {

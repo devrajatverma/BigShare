@@ -1,17 +1,23 @@
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
 
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
 
-public class ServerClass implements Runnable {
+public class ServerClass extends Thread {
+	public ServerClass() {
+
+	}
 
 	ServerSocket serverSocket = null;
 	Socket socket = null;
@@ -21,23 +27,42 @@ public class ServerClass implements Runnable {
 	OutputStream out = null;
 	String filename = null;
 	long fileLength = 0L;
-	long status = 0L;
-	ProgressBar bar = null;
-	ProgressIndicator indicator = null;
+
+	public String getIp() throws Exception {
+		URL whatismyip = new URL("http://checkip.amazonaws.com");
+		BufferedReader in = null;
+		try {
+			in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
+			String ip = in.readLine();
+			return ip;
+		} finally {
+			if (in != null) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 
 	@Override
 	public void run() {
 		try {
-			try {
-				serverSocket = new ServerSocket(2005);
-			} catch (IOException ex) {
-				System.out.println("Can't setup server on this port number. ");
-			}
-			try {
-				socket = serverSocket.accept();
-			} catch (IOException ex) {
-				System.out.println("Can't accept client connection. ");
-			}
+			serverSocket = new ServerSocket(2000);
+		} catch (IOException ex) {
+			System.out.println("Can't setup server on this port number. ");
+		}
+		try {
+			socket = serverSocket.accept();
+		} catch (IOException ex) {
+			System.out.println("Can't accept client connection. ");
+		}
+	}
+
+	public void activate(ProgressBar bar, ProgressIndicator indicator) {
+		new Thread(this, "server").start();
+		try {
 
 			try {
 				in = socket.getInputStream();
@@ -62,17 +87,16 @@ public class ServerClass implements Runnable {
 			}
 
 			byte[] bytes = new byte[8192]; // 1 mb buffer
+			double status = 0D;
 			int count;
 			while ((count = in.read(bytes)) > 0) {
 				out.write(bytes, 0, count);
 				status += count;
-				bar.setProgress((status / fileLength) * 100D);
-				indicator.setProgress((status / fileLength) * 100D);
+				bar.setProgress(status / fileLength);
+				indicator.setProgress(status / fileLength);
 			}
 			if (receivedzip.getName().endsWith(".zip")) {
-				System.out.println("Decompressing...");
-				Compress.unzip("C:\\Users\\RAJAT VERMA\\Desktop\\receiver\\" + filename,
-						"C:\\Users\\RAJAT VERMA\\Desktop\\receiver\\", "");
+				Compress.unzip(receivedzip.getPath(), destpath.getPath(), "");
 			}
 
 		} catch (IOException e) {
@@ -90,7 +114,6 @@ public class ServerClass implements Runnable {
 				} catch (IOException e) {
 					System.out.println("Error while closing ServerSocket");
 				}
-
 			if (out != null)
 				try {
 					out.close();
@@ -109,4 +132,36 @@ public class ServerClass implements Runnable {
 		}
 	}
 
+	@Override
+	protected void finalize() throws Throwable {
+		if (socket != null)
+			try {
+				socket.close();
+			} catch (IOException e) {
+				System.out.println("Error while closing socket");
+			}
+		if (serverSocket != null)
+			try {
+				serverSocket.close();
+			} catch (IOException e) {
+				System.out.println("Error while closing ServerSocket");
+			}
+
+		if (out != null)
+			try {
+				out.close();
+			} catch (IOException e) {
+				System.out.println("Eoor while closing out stream");
+			}
+		if (in != null)
+			try {
+				in.close();
+			} catch (IOException e) {
+				System.out.println("Error while closing in socket stream");
+			}
+
+		if (receivedzip.getName().endsWith(".zip"))
+			receivedzip.delete();
+		super.finalize();
+	}
 }
