@@ -29,22 +29,7 @@ public class ServerClass extends Thread {
 
 	@Override
 	public void run() {
-		try {
-			byte[] bytes = new byte[8192]; // 1 mb buffer
-			double status = 0D;
-			int count;
-			while ((count = in.read(bytes)) > 0) {
-				out.write(bytes, 0, count);
-				status += count;
-				bar.setProgress(status / fileLength);
-				indicator.setProgress(status / fileLength);
-			}
-			if (receivedzip.getName().endsWith(".zip")) {
-				Compress.unzip(receivedzip.getPath(), destpath.getPath(), "");
-			}
-		} catch (IOException e) {
-			System.out.println("Error occured in while loop in reading from socket and writing to file");
-		}
+
 	}
 
 	public void activate(ProgressBar bar, ProgressIndicator indicator) {
@@ -84,12 +69,21 @@ public class ServerClass extends Thread {
 			} catch (FileNotFoundException ex) {
 				System.out.println("File not found. ");
 			}
-			Thread t = new Thread(this, "work");
-			t.start();
 			try {
-				t.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+				byte[] bytes = new byte[8192]; // 1 mb buffer
+				double status = 0D;
+				int count;
+				while ((count = in.read(bytes)) > 0) {
+					out.write(bytes, 0, count);
+					status += count;
+					bar.setProgress(status / fileLength);
+					indicator.setProgress(status / fileLength);
+				}
+				if (receivedzip.getName().endsWith(".zip")) {
+					Compress.unzip(receivedzip.getPath(), destpath.getPath(), "");
+				}
+			} catch (IOException e) {
+				System.out.println("Error occured in while loop in reading from socket and writing to file");
 			}
 
 		} finally {

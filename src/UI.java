@@ -68,7 +68,10 @@ public class UI extends Application {
 		btnReceive.setOnAction((ae) -> {
 			stage.setScene(receive);
 			stage.show();
-			server.activate(progressBarServer, progressIndicatorServer);
+			Thread t = new Thread(() -> {
+				server.activate(progressBarServer, progressIndicatorServer);
+			}, "");
+			t.start();
 		});
 
 		rootHome.getChildren().addAll(btnSend, btnReceive);
