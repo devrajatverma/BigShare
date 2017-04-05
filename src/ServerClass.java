@@ -14,7 +14,7 @@ import java.net.URL;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
 
-public class ServerClass extends Thread {
+public class ServerClass {
 
 	ServerSocket serverSocket = null;
 	Socket socket = null;
@@ -24,18 +24,8 @@ public class ServerClass extends Thread {
 	OutputStream out = null;
 	String filename = null;
 	long fileLength = 0L;
-	ProgressBar bar = null;
-	ProgressIndicator indicator = null;
-
-	@Override
-	public void run() {
-
-	}
 
 	public void activate(ProgressBar bar, ProgressIndicator indicator) {
-		this.bar = bar;
-		this.indicator = indicator;
-
 		try {
 			try {
 				serverSocket = new ServerSocket(2000);
@@ -69,6 +59,7 @@ public class ServerClass extends Thread {
 			} catch (FileNotFoundException ex) {
 				System.out.println("File not found. ");
 			}
+
 			try {
 				byte[] bytes = new byte[8192]; // 1 mb buffer
 				double status = 0D;

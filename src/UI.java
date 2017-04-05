@@ -66,12 +66,18 @@ public class UI extends Application {
 		btnReceive.setEffect(innerShadow);
 		btnReceive.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnReceive.setOnAction((ae) -> {
+			/*
+			 * Runnable r = new Runnable() {
+			 * 
+			 * @Override public void run() { server.activate(progressBarServer,
+			 * progressIndicatorServer); } }; new Thread(r).start();
+			 */
+
+			Thread t = new Thread(() -> server.activate(progressBarServer, progressIndicatorServer), "activate");
+			t.start();
 			stage.setScene(receive);
 			stage.show();
-			Thread t = new Thread(() -> {
-				server.activate(progressBarServer, progressIndicatorServer);
-			}, "");
-			t.start();
+
 		});
 
 		rootHome.getChildren().addAll(btnSend, btnReceive);
