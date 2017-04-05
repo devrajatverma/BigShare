@@ -23,15 +23,12 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class UI extends Application {
-	ProgressBar progressBarServer = null;
-	ProgressIndicator progressIndicatorServer = null;
-
 	@Override
 	public void start(Stage stage) {
 		ProgressBar progressBarClient = new ProgressBar();
 		ProgressIndicator progressIndicatorClient = new ProgressIndicator();
-		progressBarServer = new ProgressBar();
-		progressIndicatorServer = new ProgressIndicator();
+		ProgressBar progressBarServer = new ProgressBar();
+		ProgressIndicator progressIndicatorServer = new ProgressIndicator();
 		stage.setTitle("BIG SHARE");
 		ClientClass client = new ClientClass();
 		ServerClass server = new ServerClass();

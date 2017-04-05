@@ -15,9 +15,6 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
 
 public class ServerClass extends Thread {
-	public ServerClass() {
-
-	}
 
 	ServerSocket serverSocket = null;
 	Socket socket = null;
@@ -27,46 +24,48 @@ public class ServerClass extends Thread {
 	OutputStream out = null;
 	String filename = null;
 	long fileLength = 0L;
-
-	public String getIp() throws Exception {
-		URL whatismyip = new URL("http://checkip.amazonaws.com");
-		BufferedReader in = null;
-		try {
-			in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
-			String ip = in.readLine();
-			return ip;
-		} finally {
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+	ProgressBar bar = null;
+	ProgressIndicator indicator = null;
 
 	@Override
 	public void run() {
 		try {
-			serverSocket = new ServerSocket(2000);
-		} catch (IOException ex) {
-			System.out.println("Can't setup server on this port number. ");
-		}
-		try {
-			socket = serverSocket.accept();
-		} catch (IOException ex) {
-			System.out.println("Can't accept client connection. ");
+			byte[] bytes = new byte[8192]; // 1 mb buffer
+			double status = 0D;
+			int count;
+			while ((count = in.read(bytes)) > 0) {
+				out.write(bytes, 0, count);
+				status += count;
+				bar.setProgress(status / fileLength);
+				indicator.setProgress(status / fileLength);
+			}
+			if (receivedzip.getName().endsWith(".zip")) {
+				Compress.unzip(receivedzip.getPath(), destpath.getPath(), "");
+			}
+		} catch (IOException e) {
+			System.out.println("Error occured in while loop in reading from socket and writing to file");
 		}
 	}
 
 	public void activate(ProgressBar bar, ProgressIndicator indicator) {
-		new Thread(this, "server").start();
+		this.bar = bar;
+		this.indicator = indicator;
+
 		try {
+			try {
+				serverSocket = new ServerSocket(2000);
+			} catch (IOException ex) {
+				System.out.println("Can't setup server on this port number. ");
+			}
+			try {
+				socket = serverSocket.accept();
+			} catch (IOException ex) {
+				System.out.println("Can't accept client connection. ");
+			}
 
 			try {
 				in = socket.getInputStream();
-			} catch (IOException ex) {
+			} catch (IOException e) {
 				System.out.println("Can't get socket input stream. ");
 			}
 
@@ -85,22 +84,14 @@ public class ServerClass extends Thread {
 			} catch (FileNotFoundException ex) {
 				System.out.println("File not found. ");
 			}
-
-			byte[] bytes = new byte[8192]; // 1 mb buffer
-			double status = 0D;
-			int count;
-			while ((count = in.read(bytes)) > 0) {
-				out.write(bytes, 0, count);
-				status += count;
-				bar.setProgress(status / fileLength);
-				indicator.setProgress(status / fileLength);
-			}
-			if (receivedzip.getName().endsWith(".zip")) {
-				Compress.unzip(receivedzip.getPath(), destpath.getPath(), "");
+			Thread t = new Thread(this, "work");
+			t.start();
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 
-		} catch (IOException e) {
-			System.out.println("Error occured in while loop in reading from socket and writing to file");
 		} finally {
 			if (socket != null)
 				try {
@@ -160,8 +151,25 @@ public class ServerClass extends Thread {
 				System.out.println("Error while closing in socket stream");
 			}
 
-		if (receivedzip.getName().endsWith(".zip"))
-			receivedzip.delete();
 		super.finalize();
 	}
+
+	public String getIp() throws Exception {
+		URL whatismyip = new URL("http://checkip.amazonaws.com");
+		BufferedReader in = null;
+		try {
+			in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
+			String ip = in.readLine();
+			return ip;
+		} finally {
+			if (in != null) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
 }
