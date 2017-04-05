@@ -67,8 +67,10 @@ public class ServerClass {
 				while ((count = in.read(bytes)) > 0) {
 					out.write(bytes, 0, count);
 					status += count;
-					bar.setProgress(status / fileLength);
-					indicator.setProgress(status / fileLength);
+
+					UI.bar = status / fileLength;
+					UI.indicator = status / fileLength;
+
 				}
 				if (receivedzip.getName().endsWith(".zip")) {
 					Compress.unzip(receivedzip.getPath(), destpath.getPath(), "");

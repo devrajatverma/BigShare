@@ -23,12 +23,15 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class UI extends Application {
+	static double bar = 0, indicator = 0;
+
 	@Override
 	public void start(Stage stage) {
 		ProgressBar progressBarClient = new ProgressBar();
 		ProgressIndicator progressIndicatorClient = new ProgressIndicator();
 		ProgressBar progressBarServer = new ProgressBar();
 		ProgressIndicator progressIndicatorServer = new ProgressIndicator();
+
 		stage.setTitle("BIG SHARE");
 		ClientClass client = new ClientClass();
 		ServerClass server = new ServerClass();
@@ -66,15 +69,14 @@ public class UI extends Application {
 		btnReceive.setEffect(innerShadow);
 		btnReceive.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnReceive.setOnAction((ae) -> {
-			/*
-			 * Runnable r = new Runnable() {
-			 * 
-			 * @Override public void run() { server.activate(progressBarServer,
-			 * progressIndicatorServer); } }; new Thread(r).start();
-			 */
+			new Thread(() -> {
+				while (true) {
+					progressBarServer.setProgress(bar);
+					progressIndicatorServer.setProgress(indicator);
+				}
+			}, "serverBar&IndicatorUpdator").start();
 
-			Thread t = new Thread(() -> server.activate(progressBarServer, progressIndicatorServer), "activate");
-			t.start();
+			new Thread(() -> server.activate(progressBarServer, progressIndicatorServer), "activate").start();
 			stage.setScene(receive);
 			stage.show();
 
@@ -154,6 +156,7 @@ public class UI extends Application {
 		rootReceive.getChildren().addAll(info, separatorReceive, labelDestinationPath, btnDestPath, progressBarServer,
 				progressIndicatorServer);
 		// -------------------------------------------------------------
+
 		stage.setOnCloseRequest((ae) -> {
 			if (server.socket != null)
 				try {
@@ -167,6 +170,13 @@ public class UI extends Application {
 				} catch (IOException e) {
 					System.out.println("Error while closing ServerSocket");
 				}
+			if (client.socket != null) {
+				try {
+					client.socket.close();
+				} catch (IOException e) {
+					System.out.println("Error while closing Client Socket");
+				}
+			}
 		});
 	}
 
