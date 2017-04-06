@@ -16,7 +16,7 @@ public class ClientClass {
 	InputStream in;
 	File file;
 	String filename;
-	long fileLength;
+	double fileLength;
 	Thread t;
 
 	public void compress(File sourceDirectory) {
@@ -42,15 +42,15 @@ public class ClientClass {
 				System.out.println("Problem in getting outputStream");
 			}
 
-			double status = 0L;
 			byte[] bytes = new byte[8192]; // 1mb Buffer
-
+			filename = file.getName();
+			fileLength = file.length();
 			// Sending Name and size of the file
 
 			d = new DataOutputStream(out);
 			try {
 				d.writeUTF(filename);
-				d.writeLong(fileLength);
+				d.writeDouble(fileLength);
 			} catch (IOException e) {
 				System.out.println("Error while writing filename and size");
 			}
@@ -61,6 +61,7 @@ public class ClientClass {
 				System.out.println("File Not Found");
 			}
 
+			double status = 0L;
 			int count;
 			try {
 				while ((count = in.read(bytes)) > 0) {
@@ -70,10 +71,12 @@ public class ClientClass {
 					UI.indicatorC = status / fileLength;
 				}
 			} catch (IOException e) {
-				System.out.println("IOException during Reading form socket/Writing writing to file in client class");
+				System.out.println("Error during Reading form socket/Writing writing to file in client class");
 			}
 
 		} finally {
+			UI.loopControlSend = false;
+
 			if (socket != null)
 				try {
 					socket.close();
@@ -103,7 +106,7 @@ public class ClientClass {
 
 			if (file.getName().endsWith(".zip"))
 				file.delete();
-			UI.loopControlSend = false;
+
 		}
 	}
 }

@@ -86,7 +86,7 @@ public class UI extends Application {
 		btnReceive.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnReceive.setOnAction((ae) -> {
 			new Thread(() -> {
-				while (true) {
+				while (loopControlReceive) {
 					progressBarServer.setProgress(bar);
 					progressIndicatorServer.setProgress(indicator);
 				}
@@ -117,8 +117,6 @@ public class UI extends Application {
 			if (tempfile != null) {
 				labelPath.setText(tempfile.getAbsolutePath());
 				client.file = tempfile;
-				client.filename = tempfile.getName();
-				client.fileLength = tempfile.length();
 				browseDir.setDisable(true);
 			}
 		});
@@ -134,9 +132,8 @@ public class UI extends Application {
 				try {
 					client.t.join();
 				} catch (InterruptedException e) {
-					System.out.println("Interrupted brnDir Waiting for Compress to Complete.");
+					System.out.println("Interrupted browseDir Waiting for Compress to Complete.");
 				}
-
 				labelPath.setText("COMPRESSING DONE " + client.file.getPath());
 			}
 		});
@@ -175,7 +172,6 @@ public class UI extends Application {
 
 		rootReceive.getChildren().addAll(info, separatorReceive, labelDestinationPath, btnDestPath, progressBarServer,
 				progressIndicatorServer);
-		// -------------------------------------------------------------
 
 	}
 

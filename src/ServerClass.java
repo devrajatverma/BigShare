@@ -24,7 +24,7 @@ public class ServerClass {
 	DataInputStream d;
 	OutputStream out;
 	String filename;
-	long fileLength;
+	double fileLength;
 
 	public void activate(ProgressBar bar, ProgressIndicator indicator) {
 		try {
@@ -50,7 +50,7 @@ public class ServerClass {
 			d = new DataInputStream(in);
 			try {
 				filename = d.readUTF();
-				fileLength = d.readLong();
+				fileLength = d.readDouble();
 			} catch (IOException e) {
 				System.out.println("error while reading filename and size");
 			}
@@ -61,17 +61,15 @@ public class ServerClass {
 				System.out.println("File not found. ");
 			}
 
+			byte[] bytes = new byte[8192]; // 1 mb buffer
+			double status = 0D;
+			int count;
 			try {
-				byte[] bytes = new byte[8192]; // 1 mb buffer
-				double status = 0D;
-				int count;
 				while ((count = in.read(bytes)) > 0) {
 					out.write(bytes, 0, count);
 					status += count;
-
 					UI.bar = status / fileLength;
 					UI.indicator = status / fileLength;
-
 				}
 				if (receivedzip.getName().endsWith(".zip")) {
 					Compress.unzip(receivedzip.getPath(), destpath.getPath(), "");
@@ -81,6 +79,8 @@ public class ServerClass {
 			}
 
 		} finally {
+			UI.loopControlReceive = false;
+
 			if (socket != null)
 				try {
 					socket.close();
@@ -108,7 +108,7 @@ public class ServerClass {
 
 			if (receivedzip.getName().endsWith(".zip"))
 				receivedzip.delete();
-			UI.loopControlReceive = false;
+
 		}
 	}
 
