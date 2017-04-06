@@ -12,10 +12,20 @@ public class ClientClass {
 	Socket socket;
 	String host;
 	OutputStream out;
+	DataOutputStream d;
 	InputStream in;
-	File file = null;
-	String filename = null;
-	long fileLength = 0L;
+	File file;
+	String filename;
+	long fileLength;
+	Thread t;
+
+	public void compress(File sourceDirectory) {
+		t = new Thread(() -> {
+			Compress.zip(sourceDirectory.getPath(), sourceDirectory.getPath() + ".zip", "");
+			file = new File(sourceDirectory.getPath() + ".zip");
+		}, "Compressing");
+		t.start();
+	}
 
 	public void send() {
 		try {
@@ -37,7 +47,7 @@ public class ClientClass {
 
 			// Sending Name and size of the file
 
-			DataOutputStream d = new DataOutputStream(out);
+			d = new DataOutputStream(out);
 			try {
 				d.writeUTF(filename);
 				d.writeLong(fileLength);
@@ -64,51 +74,36 @@ public class ClientClass {
 			}
 
 		} finally {
-			if (out != null)
-				try {
-					out.close();
-				} catch (IOException e) {
-					System.out.println("IOException during cloasing out stream");
-				}
-			if (in != null)
-				try {
-					in.close();
-				} catch (IOException e) {
-					System.out.println("IOException during closing in stream");
-				}
 			if (socket != null)
 				try {
 					socket.close();
 				} catch (IOException e) {
 					System.out.println("IOException during closing client socket");
 				}
+
+			if (out != null)
+				try {
+					out.close();
+				} catch (IOException e) {
+					System.out.println("IOException during cloasing out stream");
+				}
+			if (d != null)
+				try {
+					d.close();
+				} catch (IOException e1) {
+					System.out.println("Error while closing DataOutputStream");
+				}
+
+			if (in != null)
+				try {
+					in.close();
+				} catch (IOException e) {
+					System.out.println("IOException during closing in stream");
+				}
+
 			if (file.getName().endsWith(".zip"))
 				file.delete();
+			UI.loopControlSend = false;
 		}
-	}
-
-	@Override
-	protected void finalize() throws Throwable {
-		if (out != null)
-			try {
-				out.close();
-			} catch (IOException e) {
-				System.out.println("IOException during cloasing out stream");
-			}
-		if (in != null)
-			try {
-				in.close();
-			} catch (IOException e) {
-				System.out.println("IOException during closing in stream");
-			}
-		if (socket != null)
-			try {
-				socket.close();
-			} catch (IOException e) {
-				System.out.println("IOException during closing client socket");
-			}
-		if (file.getName().endsWith(".zip"))
-			file.delete();
-		super.finalize();
 	}
 }

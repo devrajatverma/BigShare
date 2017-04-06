@@ -1,8 +1,8 @@
 import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -25,15 +25,23 @@ import javafx.stage.Stage;
 public class UI extends Application {
 	static double bar = 0, indicator = 0;
 	static double barC = 0, indicatorC = 0;
+	static Boolean loopControlSend = true, loopControlReceive = true;
 
 	@Override
 	public void start(Stage stage) {
+		Platform.setImplicitExit(true);
+		stage.setOnCloseRequest((ae) -> {
+			Platform.exit();
+			System.exit(0);
+		});
+
 		ProgressBar progressBarClient = new ProgressBar();
 		ProgressIndicator progressIndicatorClient = new ProgressIndicator();
 		ProgressBar progressBarServer = new ProgressBar();
 		ProgressIndicator progressIndicatorServer = new ProgressIndicator();
 
 		stage.setTitle("BIG SHARE");
+
 		ClientClass client = new ClientClass();
 		ServerClass server = new ServerClass();
 
@@ -63,7 +71,7 @@ public class UI extends Application {
 		btnSend.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnSend.setOnAction((ae) -> {
 			new Thread(() -> {
-				while (true) {
+				while (loopControlSend) {
 					progressBarClient.setProgress(barC);
 					progressIndicatorClient.setProgress(indicatorC);
 				}
@@ -95,11 +103,10 @@ public class UI extends Application {
 
 		// ------------send-----------
 		TextField serverAddressTaker = new TextField("192.168.0.100");
+		serverAddressTaker.setPromptText("Enter The Address");
 
-		serverAddressTaker.setPrefSize(150, 0);
-
-		Text instruction = new Text("Either Chose file OR directory");
-		instruction.setFont(new Font(25));
+		Text instruction = new Text("Either Chose File or Directory");
+		instruction.setFont(new Font(30));
 		Label labelPath = new Label();
 		Button browseDir = new Button("Browse Directory to be sent");
 		Button browseFile = new Button("Browse File to be sent");
@@ -118,17 +125,19 @@ public class UI extends Application {
 
 		browseDir.setOnAction((ae) -> {
 			DirectoryChooser directorychoser = new DirectoryChooser();
-			File tempfile = directorychoser.showDialog(stage);
+			File sourceDirectory = directorychoser.showDialog(stage);
 
-			if (tempfile != null) {
-				labelPath.setText("COMPRESSING " + tempfile.getPath());
-				Compress.zip(tempfile.getPath(), tempfile.getPath() + ".zip", "");
-				labelPath.setText("COMPRESSING DONE");
-				tempfile = new File(tempfile.getPath() + ".zip");
-				client.file = tempfile;
-				client.filename = tempfile.getName();
-				client.fileLength = tempfile.length();
+			if (sourceDirectory != null) {
 				browseFile.setDisable(true);
+				labelPath.setText("COMPRESSING " + sourceDirectory.getPath());
+				client.compress(sourceDirectory);
+				try {
+					client.t.join();
+				} catch (InterruptedException e) {
+					System.out.println("Interrupted brnDir Waiting for Compress to Complete.");
+				}
+
+				labelPath.setText("COMPRESSING DONE " + client.file.getPath());
 			}
 		});
 
@@ -168,27 +177,6 @@ public class UI extends Application {
 				progressIndicatorServer);
 		// -------------------------------------------------------------
 
-		stage.setOnCloseRequest((ae) -> {
-			if (server.socket != null)
-				try {
-					server.socket.close();
-				} catch (IOException e) {
-					System.out.println("Error while closing socket");
-				}
-			if (server.serverSocket != null)
-				try {
-					server.serverSocket.close();
-				} catch (IOException e) {
-					System.out.println("Error while closing ServerSocket");
-				}
-			if (client.socket != null) {
-				try {
-					client.socket.close();
-				} catch (IOException e) {
-					System.out.println("Error while closing Client Socket");
-				}
-			}
-		});
 	}
 
 	public static void main(String[] args) {

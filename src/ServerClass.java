@@ -16,14 +16,15 @@ import javafx.scene.control.ProgressIndicator;
 
 public class ServerClass {
 
-	ServerSocket serverSocket = null;
-	Socket socket = null;
-	File receivedzip = null;
-	File destpath = null;
-	InputStream in = null;
-	OutputStream out = null;
-	String filename = null;
-	long fileLength = 0L;
+	ServerSocket serverSocket;
+	Socket socket;
+	File receivedzip;
+	File destpath;
+	InputStream in;
+	DataInputStream d;
+	OutputStream out;
+	String filename;
+	long fileLength;
 
 	public void activate(ProgressBar bar, ProgressIndicator indicator) {
 		try {
@@ -46,7 +47,7 @@ public class ServerClass {
 
 			// Getting File name and size
 
-			DataInputStream d = new DataInputStream(in);
+			d = new DataInputStream(in);
 			try {
 				filename = d.readUTF();
 				fileLength = d.readLong();
@@ -107,38 +108,8 @@ public class ServerClass {
 
 			if (receivedzip.getName().endsWith(".zip"))
 				receivedzip.delete();
+			UI.loopControlReceive = false;
 		}
-	}
-
-	@Override
-	protected void finalize() throws Throwable {
-		if (socket != null)
-			try {
-				socket.close();
-			} catch (IOException e) {
-				System.out.println("Error while closing socket");
-			}
-		if (serverSocket != null)
-			try {
-				serverSocket.close();
-			} catch (IOException e) {
-				System.out.println("Error while closing ServerSocket");
-			}
-
-		if (out != null)
-			try {
-				out.close();
-			} catch (IOException e) {
-				System.out.println("Eoor while closing out stream");
-			}
-		if (in != null)
-			try {
-				in.close();
-			} catch (IOException e) {
-				System.out.println("Error while closing in socket stream");
-			}
-
-		super.finalize();
 	}
 
 	public String getIp() throws Exception {
