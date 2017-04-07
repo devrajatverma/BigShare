@@ -28,13 +28,12 @@ public class ClientClass {
 		OutputStream out = null;
 		DataOutputStream d = null;
 		InputStream in = null;
-
 		String filename = null;
 		double fileLength = 0;
 
 		try {
 			try {
-				socket = new Socket(host, 2000);
+				socket = new Socket(host, 8888);
 			} catch (UnknownHostException e) {
 				System.out.println("UnknownHostException Occured");
 			} catch (IOException e) {
@@ -46,7 +45,6 @@ public class ClientClass {
 				System.out.println("Problem in getting outputStream");
 			}
 
-			byte[] bytes = new byte[8192]; // 1mb Buffer
 			filename = file.getName();
 			fileLength = file.length();
 			// Sending Name and size of the file
@@ -65,8 +63,9 @@ public class ClientClass {
 				System.out.println("File Not Found");
 			}
 
+			byte[] bytes = new byte[16000]; // 16 mb Buffer
 			double status = 0L;
-			int count;
+			int count = 0;
 			try {
 				while ((count = in.read(bytes)) > 0) {
 					out.write(bytes, 0, count);
@@ -80,6 +79,8 @@ public class ClientClass {
 
 		} finally {
 			UI.loopControlSend = false;
+			UI.barC = 1.0;
+			UI.indicatorC = 1.0;
 
 			if (socket != null)
 				try {

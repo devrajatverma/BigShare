@@ -1,33 +1,26 @@
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.URL;
-
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
 
 public class ServerClass {
-
-	File receivedzip;
 	File destpath;
 
-	public void activate(ProgressBar bar, ProgressIndicator indicator) {
+	public void activate() {
 		ServerSocket serverSocket = null;
 		Socket socket = null;
 		InputStream in = null;
 		OutputStream out = null;
+		File receivedzip = null;
 
 		try {
 			try {
-				serverSocket = new ServerSocket(2000);
+				serverSocket = new ServerSocket(8888);
 			} catch (IOException ex) {
 				System.out.println("Can't setup server on this port number. ");
 			}
@@ -54,16 +47,18 @@ public class ServerClass {
 			} catch (IOException e) {
 				System.out.println("error while reading filename and size");
 			}
+
 			receivedzip = new File(destpath.getPath() + "\\" + filename);
+
 			try {
 				out = new FileOutputStream(receivedzip);
 			} catch (FileNotFoundException ex) {
 				System.out.println("File not found. ");
 			}
 
-			byte[] bytes = new byte[8192]; // 1 mb buffer
+			byte[] bytes = new byte[16000]; // 16 mb buffer
 			double status = 0D;
-			int count;
+			int count = 0;
 			try {
 				while ((count = in.read(bytes)) > 0) {
 					out.write(bytes, 0, count);
@@ -82,6 +77,8 @@ public class ServerClass {
 
 		} finally {
 			UI.loopControlReceive = false;
+			UI.bar = 1.0;
+			UI.indicator = 1.0;
 
 			if (socket != null)
 				try {
@@ -111,24 +108,6 @@ public class ServerClass {
 			if (receivedzip.getName().endsWith(".zip"))
 				receivedzip.delete();
 
-		}
-	}
-
-	public String getIp() throws Exception {
-		URL whatismyip = new URL("http://checkip.amazonaws.com");
-		BufferedReader in = null;
-		try {
-			in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
-			String ip = in.readLine();
-			return ip;
-		} finally {
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
 		}
 	}
 

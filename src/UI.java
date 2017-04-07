@@ -1,5 +1,9 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.net.URL;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -40,7 +44,7 @@ public class UI extends Application {
 		ProgressIndicator progressIndicatorClient = new ProgressIndicator();
 		progressIndicatorClient.setPrefSize(90, 90);
 		ProgressBar progressBarServer = new ProgressBar();
-		progressBarServer.setPrefSize(350, 25);
+		progressBarServer.setPrefSize(350, 30);
 		ProgressIndicator progressIndicatorServer = new ProgressIndicator();
 		progressIndicatorServer.setPrefSize(90, 90);
 
@@ -75,12 +79,14 @@ public class UI extends Application {
 		btnSend.setEffect(innerShadow);
 		btnSend.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnSend.setOnAction((ae) -> {
-			new Thread(() -> {
+			Thread loop1 = new Thread(() -> {
 				while (loopControlSend) {
 					progressBarClient.setProgress(barC);
 					progressIndicatorClient.setProgress(indicatorC);
 				}
-			}, "clientBar&IndicatorUpdator").start();
+			}, "clientBar&IndicatorUpdator");
+			loop1.setPriority(2);
+			loop1.start();
 
 			stage.setScene(send);
 			stage.show();
@@ -90,14 +96,16 @@ public class UI extends Application {
 		btnReceive.setEffect(innerShadow);
 		btnReceive.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnReceive.setOnAction((ae) -> {
-			new Thread(() -> {
+			Thread loop2 = new Thread(() -> {
 				while (loopControlReceive) {
 					progressBarServer.setProgress(bar);
 					progressIndicatorServer.setProgress(indicator);
 				}
-			}, "serverBar&IndicatorUpdator").start();
+			}, "serverBar&IndicatorUpdator");
+			loop2.setPriority(2);
+			loop2.start();
 
-			new Thread(() -> server.activate(progressBarServer, progressIndicatorServer), "activate").start();
+			new Thread(() -> server.activate(), "activate").start();
 
 			stage.setScene(receive);
 			stage.show();
@@ -175,7 +183,7 @@ public class UI extends Application {
 
 		try {
 			info = new Text("Local Address " + InetAddress.getLocalHost().getHostAddress().toString()
-					+ " || Global Address " + server.getIp());
+					+ " || Global Address " + getIp());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -196,6 +204,24 @@ public class UI extends Application {
 		rootReceive.getChildren().addAll(info, separatorReceive, labelDestinationPath, decompressing, btnDestPath, sep,
 				progressBarServer, progressIndicatorServer);
 
+	}
+
+	public String getIp() throws Exception {
+		URL whatismyip = new URL("http://checkip.amazonaws.com");
+		BufferedReader in = null;
+		try {
+			in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
+			String ip = in.readLine();
+			return ip;
+		} finally {
+			if (in != null) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	public static void main(String[] args) {
