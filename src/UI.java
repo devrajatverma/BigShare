@@ -29,6 +29,7 @@ import javafx.stage.Stage;
 public class UI extends Application {
 	static double bar = 0, indicator = 0;
 	static double barC = 0, indicatorC = 0;
+
 	static Boolean loopControlSend = true, loopControlReceive = true, decompressflag = false;
 
 	@Override
@@ -39,16 +40,16 @@ public class UI extends Application {
 			System.exit(0);
 		});
 
+		stage.setResizable(false);
+		stage.setTitle("BIG SHARE By devrajatverma@gmail.com");
 		ProgressBar progressBarClient = new ProgressBar();
-		progressBarClient.setPrefSize(300, 25);
+		progressBarClient.setPrefSize(300, 30);
 		ProgressIndicator progressIndicatorClient = new ProgressIndicator();
-		progressIndicatorClient.setPrefSize(90, 90);
+		progressIndicatorClient.setPrefSize(100, 100);
 		ProgressBar progressBarServer = new ProgressBar();
 		progressBarServer.setPrefSize(350, 30);
 		ProgressIndicator progressIndicatorServer = new ProgressIndicator();
-		progressIndicatorServer.setPrefSize(90, 90);
-
-		stage.setTitle("BIG SHARE");
+		progressIndicatorServer.setPrefSize(100, 100);
 
 		ClientClass client = new ClientClass();
 		ServerClass server = new ServerClass();

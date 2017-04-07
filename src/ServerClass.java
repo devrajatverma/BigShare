@@ -52,7 +52,7 @@ public class ServerClass {
 
 			try {
 				out = new FileOutputStream(receivedzip);
-			} catch (FileNotFoundException ex) {
+			} catch (FileNotFoundException e) {
 				System.out.println("File not found. ");
 			}
 
