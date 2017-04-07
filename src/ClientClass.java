@@ -9,17 +9,13 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class ClientClass {
-	Socket socket;
+
 	String host;
-	OutputStream out;
-	DataOutputStream d;
-	InputStream in;
 	File file;
-	String filename;
-	double fileLength;
 	Thread t;
 
 	public void compress(File sourceDirectory) {
+
 		t = new Thread(() -> {
 			Compress.zip(sourceDirectory.getPath(), sourceDirectory.getPath() + ".zip", "");
 			file = new File(sourceDirectory.getPath() + ".zip");
@@ -28,6 +24,14 @@ public class ClientClass {
 	}
 
 	public void send() {
+		Socket socket = null;
+		OutputStream out = null;
+		DataOutputStream d = null;
+		InputStream in = null;
+
+		String filename = null;
+		double fileLength = 0;
+
 		try {
 			try {
 				socket = new Socket(host, 2000);

@@ -16,17 +16,15 @@ import javafx.scene.control.ProgressIndicator;
 
 public class ServerClass {
 
-	ServerSocket serverSocket;
-	Socket socket;
 	File receivedzip;
 	File destpath;
-	InputStream in;
-	DataInputStream d;
-	OutputStream out;
-	String filename;
-	double fileLength;
 
 	public void activate(ProgressBar bar, ProgressIndicator indicator) {
+		ServerSocket serverSocket = null;
+		Socket socket = null;
+		InputStream in = null;
+		OutputStream out = null;
+
 		try {
 			try {
 				serverSocket = new ServerSocket(2000);
@@ -46,8 +44,10 @@ public class ServerClass {
 			}
 
 			// Getting File name and size
+			String filename = null;
+			double fileLength = 0;
 
-			d = new DataInputStream(in);
+			DataInputStream d = new DataInputStream(in);
 			try {
 				filename = d.readUTF();
 				fileLength = d.readDouble();
