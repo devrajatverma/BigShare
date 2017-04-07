@@ -85,7 +85,7 @@ public class UI extends Application {
 					progressIndicatorClient.setProgress(indicatorC);
 				}
 			}, "clientBar&IndicatorUpdator");
-			loop1.setPriority(2);
+			loop1.setPriority(3);
 			loop1.start();
 
 			stage.setScene(send);
@@ -102,7 +102,7 @@ public class UI extends Application {
 					progressIndicatorServer.setProgress(indicator);
 				}
 			}, "serverBar&IndicatorUpdator");
-			loop2.setPriority(2);
+			loop2.setPriority(3);
 			loop2.start();
 
 			new Thread(() -> server.activate(), "activate").start();
