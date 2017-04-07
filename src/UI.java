@@ -25,7 +25,7 @@ import javafx.stage.Stage;
 public class UI extends Application {
 	static double bar = 0, indicator = 0;
 	static double barC = 0, indicatorC = 0;
-	static Boolean loopControlSend = true, loopControlReceive = true;
+	static Boolean loopControlSend = true, loopControlReceive = true, decompressflag = false;
 
 	@Override
 	public void start(Stage stage) {
@@ -36,34 +36,39 @@ public class UI extends Application {
 		});
 
 		ProgressBar progressBarClient = new ProgressBar();
+		progressBarClient.setPrefSize(300, 25);
 		ProgressIndicator progressIndicatorClient = new ProgressIndicator();
+		progressIndicatorClient.setPrefSize(90, 90);
 		ProgressBar progressBarServer = new ProgressBar();
+		progressBarServer.setPrefSize(350, 25);
 		ProgressIndicator progressIndicatorServer = new ProgressIndicator();
+		progressIndicatorServer.setPrefSize(90, 90);
 
 		stage.setTitle("BIG SHARE");
 
 		ClientClass client = new ClientClass();
 		ServerClass server = new ServerClass();
 
-		Scene home;
 		FlowPane rootHome = new FlowPane(10, 10);
 		rootHome.setAlignment(Pos.CENTER);
-		home = new Scene(rootHome, 555, 270);
+		Scene home = new Scene(rootHome, 560, 270);
 		stage.setScene(home);
 		stage.show();
 
 		FlowPane rootSend = new FlowPane(10, 10);
 		rootSend.setAlignment(Pos.TOP_CENTER);
-		Scene send = new Scene(rootSend, 400, 200);
+		Scene send = new Scene(rootSend, 520, 330);
+		Separator separatorSend = new Separator();
+		separatorSend.setPrefWidth(480);
 
 		FlowPane rootReceive = new FlowPane();
 		rootReceive.setAlignment(Pos.TOP_CENTER);
-		Scene receive = new Scene(rootReceive, 600, 400);
-		InnerShadow innerShadow = new InnerShadow(8.0, Color.AQUA);
-		Separator separatorSend = new Separator();
-		separatorSend.setPrefWidth(400);
+		Scene receive = new Scene(rootReceive, 580, 440);
 		Separator separatorReceive = new Separator();
-		separatorReceive.setPrefWidth(600);
+		separatorReceive.setPrefWidth(560);
+
+		InnerShadow innerShadow = new InnerShadow(8.0, Color.AQUA);
+
 		// -----------------home------------------------
 
 		Button btnSend = new Button("Send Mode", new ImageView("send.png"));
@@ -108,8 +113,12 @@ public class UI extends Application {
 		Text instruction = new Text("Either Chose File or Directory");
 		instruction.setFont(new Font(30));
 		Label labelPath = new Label();
-		Button browseDir = new Button("Browse Directory to be sent");
-		Button browseFile = new Button("Browse File to be sent");
+		labelPath.setFont(new Font(14));
+		labelPath.setPrefSize(520, 0);
+		Button browseFile = new Button("Browse File to be sent", new ImageView("file.png"));
+		browseFile.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+		Button browseDir = new Button("Browse Directory to be sent", new ImageView("Directory.png"));
+		browseDir.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		browseFile.setOnAction((ae) -> {
 			FileChooser fileChoser = new FileChooser();
 			File tempfile = fileChoser.showOpenDialog(stage);
@@ -138,7 +147,8 @@ public class UI extends Application {
 			}
 		});
 
-		Button btnSendNow = new Button("Send");
+		Button btnSendNow = new Button("Send", new ImageView("Send1.png"));
+		btnSendNow.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnSendNow.setOnAction((ae) -> {
 			client.host = serverAddressTaker.getText();
 			new Thread(() -> {
@@ -147,31 +157,44 @@ public class UI extends Application {
 		});
 
 		Label labelServerAddress = new Label("Enter The Address of Server");
+		labelServerAddress.setFont(new Font(15));
 
-		rootSend.getChildren().addAll(labelServerAddress, serverAddressTaker, instruction, labelPath, browseFile,
-				browseDir, btnSendNow, progressBarClient, progressIndicatorClient);
+		rootSend.getChildren().addAll(labelServerAddress, serverAddressTaker, separatorSend, instruction, labelPath,
+				browseFile, browseDir, btnSendNow, progressBarClient, progressIndicatorClient);
 
 		// ------------receive-------------------------------------------
 
 		Text info = null;
 		Label labelDestinationPath = new Label();
+		labelDestinationPath.setFont(new Font(15));
+		labelDestinationPath.setPrefSize(580, 40);
+		Label decompressing = new Label("Decompressing...");
+		decompressing.setFont(new Font(15));
+		decompressing.setPrefSize(580, 40);
+		decompressing.setVisible(decompressflag);
+
 		try {
 			info = new Text("Local Address " + InetAddress.getLocalHost().getHostAddress().toString()
-					+ "|| External Address " + server.getIp());
+					+ " || Global Address " + server.getIp());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		info.setFont(new Font(20));
 
-		Button btnDestPath = new Button("Browse Destination Directory");
+		Button btnDestPath = new Button("Browse Destination Directory", new ImageView("search.png"));
+		btnDestPath.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+		btnDestPath.setPrefWidth(340);
 		btnDestPath.setOnAction((ae) -> {
 			DirectoryChooser destinationDirectoryChoser = new DirectoryChooser();
 			server.destpath = destinationDirectoryChoser.showDialog(stage);
 			labelDestinationPath.setText(server.destpath.getPath());
 		});
 
-		rootReceive.getChildren().addAll(info, separatorReceive, labelDestinationPath, btnDestPath, progressBarServer,
-				progressIndicatorServer);
+		Label sep = new Label(" ");
+		sep.setPrefWidth(580);
+		sep.setVisible(false);
+		rootReceive.getChildren().addAll(info, separatorReceive, labelDestinationPath, decompressing, btnDestPath, sep,
+				progressBarServer, progressIndicatorServer);
 
 	}
 

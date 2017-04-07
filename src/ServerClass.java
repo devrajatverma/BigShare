@@ -72,7 +72,9 @@ public class ServerClass {
 					UI.indicator = status / fileLength;
 				}
 				if (receivedzip.getName().endsWith(".zip")) {
+					UI.decompressflag = true;
 					Compress.unzip(receivedzip.getPath(), destpath.getPath(), "");
+					UI.decompressflag = false;
 				}
 			} catch (IOException e) {
 				System.out.println("Error occured in while loop in reading from socket and writing to file");
