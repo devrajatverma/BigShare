@@ -63,8 +63,7 @@ public class ServerClass {
 				while ((count = in.read(bytes)) > 0) {
 					out.write(bytes, 0, count);
 					status += count;
-					UI.bar = status / fileLength;
-					UI.indicator = status / fileLength;
+					UI.indicator = UI.bar = status / fileLength;
 				}
 				if (receivedzip.getName().endsWith(".zip")) {
 					UI.decompressflag = true;

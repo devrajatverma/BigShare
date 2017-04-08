@@ -70,8 +70,7 @@ public class ClientClass {
 				while ((count = in.read(bytes)) > 0) {
 					out.write(bytes, 0, count);
 					status += count;
-					UI.barC = status / fileLength;
-					UI.indicatorC = status / fileLength;
+					UI.indicatorC = UI.barC = status / fileLength;
 				}
 			} catch (IOException e) {
 				System.out.println("Error during Reading form socket/Writing writing to file in client class");

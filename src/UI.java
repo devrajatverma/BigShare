@@ -45,11 +45,11 @@ public class UI extends Application {
 		ProgressBar progressBarClient = new ProgressBar();
 		progressBarClient.setPrefSize(300, 30);
 		ProgressIndicator progressIndicatorClient = new ProgressIndicator();
-		progressIndicatorClient.setPrefSize(100, 100);
+		progressIndicatorClient.setPrefSize(70, 70);
 		ProgressBar progressBarServer = new ProgressBar();
 		progressBarServer.setPrefSize(350, 30);
 		ProgressIndicator progressIndicatorServer = new ProgressIndicator();
-		progressIndicatorServer.setPrefSize(100, 100);
+		progressIndicatorServer.setPrefSize(70, 70);
 
 		ClientClass client = new ClientClass();
 		ServerClass server = new ServerClass();
