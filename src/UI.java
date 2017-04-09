@@ -37,8 +37,8 @@ public class UI extends Application {
 	// -----------UI Fields-----------------------------
 	static double bar = 0, indicator = 0;
 	static double barC = 0, indicatorC = 0;
-	static Boolean loopControlSend = true, loopControlReceive = true, decompressflag = false;
-	Label Incomming;
+	static Boolean loopControlSend = true, loopControlReceive = true;
+	Label Incomming, labelDecompress;
 
 	// ------server fields-------
 	File destpath;
@@ -79,7 +79,7 @@ public class UI extends Application {
 
 		FlowPane rootReceive = new FlowPane();
 		rootReceive.setAlignment(Pos.TOP_CENTER);
-		Scene receive = new Scene(rootReceive, 580, 440);
+		Scene receive = new Scene(rootReceive, 580, 470);
 		Separator separatorReceive = new Separator();
 		separatorReceive.setPrefWidth(560);
 
@@ -133,6 +133,17 @@ public class UI extends Application {
 		Label labelPath = new Label();
 		labelPath.setFont(new Font(20));
 		labelPath.setPrefSize(520, 0);
+
+		Button btnSendNow = new Button("Send", new ImageView("Send1.png"));
+		btnSendNow.setDisable(true);
+		btnSendNow.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+		btnSendNow.setOnAction((ae) -> {
+			client.host = serverAddressTaker.getText();
+			new Thread(() -> {
+				client.send();
+			}, "Client.send()").start();
+		});
+
 		Button browseFile = new Button("Browse File to be sent", new ImageView("file.png"));
 		browseFile.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		Button browseDir = new Button("Browse Directory to be sent", new ImageView("Directory.png"));
@@ -142,6 +153,7 @@ public class UI extends Application {
 			File tempfile = fileChoser.showOpenDialog(stage);
 
 			if (tempfile != null) {
+				Platform.runLater(() -> btnSendNow.setDisable(false));
 				labelPath.setText(tempfile.getAbsolutePath());
 				client.file = tempfile;
 				browseDir.setDisable(true);
@@ -160,6 +172,7 @@ public class UI extends Application {
 					Compress.zip(sourceDirectory.getPath(), sourceDirectory.getPath() + ".zip", "");
 					Platform.runLater(() -> {
 						labelPath.setText("Compressing Done...!!! Now Click On Send Icon");
+						btnSendNow.setDisable(false);
 					});
 				}, "Compressing").start();
 
@@ -167,16 +180,7 @@ public class UI extends Application {
 			}
 		});
 
-		Button btnSendNow = new Button("Send", new ImageView("Send1.png"));
-		btnSendNow.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-		btnSendNow.setOnAction((ae) -> {
-			client.host = serverAddressTaker.getText();
-			new Thread(() -> {
-				client.send();
-			}, "Client.send()").start();
-		});
-
-		Label labelServerAddress = new Label("Enter The Address of Server");
+		Label labelServerAddress = new Label("Enter The Address of SENDER: ");
 		labelServerAddress.setFont(new Font(15));
 
 		rootSend.getChildren().addAll(labelServerAddress, serverAddressTaker, separatorSend, instruction, labelPath,
@@ -194,16 +198,15 @@ public class UI extends Application {
 		info.setFont(new Font(20));
 
 		Label labelDestinationPath = new Label();
-		labelDestinationPath.setFont(new Font(15));
-		labelDestinationPath.setPrefSize(580, 40);
+		labelDestinationPath.setFont(new Font(14));
+		labelDestinationPath.setPrefSize(580, 20);
 
-		Label decompressing = new Label("Decompressing...");
-		decompressing.setFont(new Font(15));
-		decompressing.setPrefSize(580, 40);
-		decompressing.setVisible(decompressflag);
+		Label decompressing = new Label();
+		decompressing.setFont(new Font(14));
+		decompressing.setPrefSize(580, 20);
 
 		Button btnDestPath = new Button("Browse Destination Directory", new ImageView("search.png"));
-		btnDestPath.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+		btnDestPath.setContentDisplay(ContentDisplay.TOP);
 		btnDestPath.setPrefWidth(340);
 		btnDestPath.setOnAction((ae) -> {
 			DirectoryChooser destinationDirectoryChoser = new DirectoryChooser();
@@ -214,8 +217,10 @@ public class UI extends Application {
 		Incomming = new Label();
 		Incomming.setFont(new Font(25));
 		Incomming.setPrefWidth(580);
+		labelDecompress = new Label();
+		labelDecompress.setFont(new Font(25));
 		rootReceive.getChildren().addAll(info, separatorReceive, labelDestinationPath, decompressing, btnDestPath,
-				Incomming, progressBarServer, progressIndicatorServer);
+				Incomming, labelDecompress, progressBarServer, progressIndicatorServer);
 
 	}
 
@@ -296,9 +301,9 @@ public class UI extends Application {
 					UI.indicator = UI.bar = status / fileLength;
 				}
 				if (receivedzip.getName().endsWith(".zip")) {
-					UI.decompressflag = true;
+					Platform.runLater(() -> labelDecompress.setText("Decompressing Please Be Petient"));
 					Compress.unzip(receivedzip.getPath(), destpath.getPath(), "");
-					UI.decompressflag = false;
+					Platform.runLater(() -> labelDecompress.setText("Decompressing DONE"));
 				}
 			} catch (IOException e) {
 				System.out.println("Error occured in while loop in reading from socket and writing to file");
