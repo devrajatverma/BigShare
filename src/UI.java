@@ -29,7 +29,6 @@ import javafx.stage.Stage;
 public class UI extends Application {
 	static double bar = 0, indicator = 0;
 	static double barC = 0, indicatorC = 0;
-
 	static Boolean loopControlSend = true, loopControlReceive = true, decompressflag = false;
 
 	@Override
@@ -145,14 +144,15 @@ public class UI extends Application {
 
 			if (sourceDirectory != null) {
 				browseFile.setDisable(true);
-				labelPath.setText("COMPRESSING " + sourceDirectory.getPath());
-				client.compress(sourceDirectory);
-				try {
-					client.t.join();
-				} catch (InterruptedException e) {
-					System.out.println("Interrupted browseDir Waiting for Compress to Complete.");
-				}
-				labelPath.setText("COMPRESSING DONE " + client.file.getPath());
+				// labelPath.setText("COMPRESSING " +
+				// sourceDirectory.getPath());
+
+				new Thread(() -> {
+					Compress.zip(sourceDirectory.getPath(), sourceDirectory.getPath() + ".zip", "");
+
+				}, "Compressing").start();
+
+				client.file = new File(sourceDirectory.getPath() + ".zip");
 			}
 		});
 
@@ -174,14 +174,6 @@ public class UI extends Application {
 		// ------------receive-------------------------------------------
 
 		Text info = null;
-		Label labelDestinationPath = new Label();
-		labelDestinationPath.setFont(new Font(15));
-		labelDestinationPath.setPrefSize(580, 40);
-		Label decompressing = new Label("Decompressing...");
-		decompressing.setFont(new Font(15));
-		decompressing.setPrefSize(580, 40);
-		decompressing.setVisible(decompressflag);
-
 		try {
 			info = new Text("Local Address " + InetAddress.getLocalHost().getHostAddress().toString()
 					+ " || Global Address " + getIp());
@@ -189,6 +181,15 @@ public class UI extends Application {
 			e.printStackTrace();
 		}
 		info.setFont(new Font(20));
+
+		Label labelDestinationPath = new Label();
+		labelDestinationPath.setFont(new Font(15));
+		labelDestinationPath.setPrefSize(580, 40);
+
+		Label decompressing = new Label("Decompressing...");
+		decompressing.setFont(new Font(15));
+		decompressing.setPrefSize(580, 40);
+		decompressing.setVisible(decompressflag);
 
 		Button btnDestPath = new Button("Browse Destination Directory", new ImageView("search.png"));
 		btnDestPath.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
@@ -199,8 +200,8 @@ public class UI extends Application {
 			labelDestinationPath.setText(server.destpath.getPath());
 		});
 
-		Label sep = new Label(" ");
-		sep.setPrefWidth(580);
+		Label sep = new Label();
+		sep.setPrefSize(580, 30);
 		sep.setVisible(false);
 		rootReceive.getChildren().addAll(info, separatorReceive, labelDestinationPath, decompressing, btnDestPath, sep,
 				progressBarServer, progressIndicatorServer);

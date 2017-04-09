@@ -12,16 +12,6 @@ public class ClientClass {
 
 	String host;
 	File file;
-	Thread t;
-
-	public void compress(File sourceDirectory) {
-
-		t = new Thread(() -> {
-			Compress.zip(sourceDirectory.getPath(), sourceDirectory.getPath() + ".zip", "");
-			file = new File(sourceDirectory.getPath() + ".zip");
-		}, "Compressing");
-		t.start();
-	}
 
 	public void send() {
 		Socket socket = null;

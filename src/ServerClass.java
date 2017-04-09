@@ -10,13 +10,13 @@ import java.net.Socket;
 
 public class ServerClass {
 	File destpath;
+	File receivedzip;
 
 	public void activate() {
 		ServerSocket serverSocket = null;
 		Socket socket = null;
 		InputStream in = null;
 		OutputStream out = null;
-		File receivedzip = null;
 
 		try {
 			try {
