@@ -38,7 +38,7 @@ public class UI extends Application {
 	static double bar = 0, indicator = 0;
 	static double barC = 0, indicatorC = 0;
 	static Boolean loopControlSend = true, loopControlReceive = true;
-	Label Incomming, labelDecompress;
+	Label Incomming, labelDecompress, labelSenderStatus;
 
 	// ------server fields-------
 	File destpath;
@@ -73,7 +73,7 @@ public class UI extends Application {
 
 		FlowPane rootSend = new FlowPane(10, 10);
 		rootSend.setAlignment(Pos.TOP_CENTER);
-		Scene send = new Scene(rootSend, 520, 330);
+		Scene send = new Scene(rootSend, 520, 355);
 		Separator separatorSend = new Separator();
 		separatorSend.setPrefWidth(480);
 
@@ -125,8 +125,11 @@ public class UI extends Application {
 		rootHome.getChildren().addAll(btnSend, btnReceive);
 
 		// ------------send-----------
+		Label labelServerAddress = new Label("Enter The Address of RECEIVER (LOCAL IF IN SAME NETWORK): ");
+		labelServerAddress.setFont(new Font(15));
+
 		TextField serverAddressTaker = new TextField("192.168.0.100");
-		serverAddressTaker.setPromptText("Enter The Address");
+		serverAddressTaker.setPromptText("Enter The Address ");
 
 		Text instruction = new Text("Either Chose File or Directory");
 		instruction.setFont(new Font(30));
@@ -139,8 +142,10 @@ public class UI extends Application {
 		btnSendNow.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnSendNow.setOnAction((ae) -> {
 			client.host = serverAddressTaker.getText();
+			labelSenderStatus.setText("Sending...");
 			new Thread(() -> {
 				client.send();
+				Platform.runLater(() -> labelSenderStatus.setText("SENT"));
 			}, "Client.send()").start();
 		});
 
@@ -153,7 +158,7 @@ public class UI extends Application {
 			File tempfile = fileChoser.showOpenDialog(stage);
 
 			if (tempfile != null) {
-				Platform.runLater(() -> btnSendNow.setDisable(false));
+				btnSendNow.setDisable(false);
 				labelPath.setText(tempfile.getAbsolutePath());
 				client.file = tempfile;
 				browseDir.setDisable(true);
@@ -180,11 +185,11 @@ public class UI extends Application {
 			}
 		});
 
-		Label labelServerAddress = new Label("Enter The Address of SENDER: ");
-		labelServerAddress.setFont(new Font(15));
-
+		labelSenderStatus = new Label();
+		labelSenderStatus.setFont(new Font(13));
+		labelSenderStatus.setPrefWidth(520);
 		rootSend.getChildren().addAll(labelServerAddress, serverAddressTaker, separatorSend, instruction, labelPath,
-				browseFile, browseDir, btnSendNow, progressBarClient, progressIndicatorClient);
+				browseFile, browseDir, btnSendNow, labelSenderStatus, progressBarClient, progressIndicatorClient);
 
 		// ------------receive-------------------------------------------
 
