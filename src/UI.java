@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -38,9 +40,9 @@ public class UI extends Application {
 	static double bar = 0, indicator = 0;
 	static double barC = 0, indicatorC = 0;
 	static Boolean loopControlSend = true, loopControlReceive = true;
-	Label Incomming, labelDecompress, labelSenderStatus;
-
-	// ------server fields-------
+	Label Incomming, labelDecompress;
+	static Label labelSenderStatus;
+	// ------server fields-----------
 	File destpath;
 	File receivedzip;
 
@@ -73,13 +75,13 @@ public class UI extends Application {
 
 		FlowPane rootSend = new FlowPane(10, 10);
 		rootSend.setAlignment(Pos.TOP_CENTER);
-		Scene send = new Scene(rootSend, 520, 355);
+		Scene send = new Scene(rootSend, 520, 380);
 		Separator separatorSend = new Separator();
 		separatorSend.setPrefWidth(480);
 
 		FlowPane rootReceive = new FlowPane();
 		rootReceive.setAlignment(Pos.TOP_CENTER);
-		Scene receive = new Scene(rootReceive, 580, 470);
+		Scene receive = new Scene(rootReceive, 580, 460);
 		Separator separatorReceive = new Separator();
 		separatorReceive.setPrefWidth(560);
 
@@ -171,17 +173,24 @@ public class UI extends Application {
 
 			if (sourceDirectory != null) {
 				browseFile.setDisable(true);
-				labelPath.setText("COMPRESSING.... Please Be PETIENT");
+				File zip = new File(sourceDirectory.getPath() + ".zip");
 
-				new Thread(() -> {
-					Compress.zip(sourceDirectory.getPath(), sourceDirectory.getPath() + ".zip", "");
-					Platform.runLater(() -> {
-						labelPath.setText("Compressing Done...!!! Now Click On Send Icon");
-						btnSendNow.setDisable(false);
-					});
-				}, "Compressing").start();
+				if (!(zip.exists())) {
+					new Thread(() -> {
+						Platform.runLater(() -> {
+							labelPath.setText("COMPRESSING.... Please Be PETIENT");
+						});
 
-				client.file = new File(sourceDirectory.getPath() + ".zip");
+						Compress.zip(sourceDirectory.getPath(), sourceDirectory.getPath() + ".zip", "");
+						Platform.runLater(() -> {
+							labelPath.setText("Compressing Done...!!! Now Click On Send Icon");
+							btnSendNow.setDisable(false);
+						});
+					}, "Compressing").start();
+				}
+
+				client.file = zip;
+				btnSendNow.setDisable(false);
 			}
 		});
 
@@ -252,10 +261,27 @@ public class UI extends Application {
 	}
 
 	public void server() {
+		String filename = null;
+		long fileLength = 0;
+		long offset = 0;
 		ServerSocket serverSocket = null;
 		Socket socket = null;
 		InputStream in = null;
 		OutputStream out = null;
+		DataInputStream din = null;
+		DataOutputStream dout = null;
+		File temp = null;
+
+		temp = new File(".tmp");
+		if (temp.exists()) {
+			try (DataInputStream d = new DataInputStream(new FileInputStream(temp))) {
+				offset = d.readLong();
+			} catch (FileNotFoundException e) {
+				System.out.println("temp file not found");
+			} catch (IOException e) {
+				System.out.println("Error while reading offset");
+			}
+		}
 
 		try {
 			try {
@@ -270,19 +296,29 @@ public class UI extends Application {
 			}
 
 			try {
+				out = socket.getOutputStream();
+			} catch (IOException e) {
+				System.out.println("Error While getting output stream");
+			}
+			dout = new DataOutputStream(out);
+			try {
+				dout.writeLong(offset);
+			} catch (IOException e) {
+				System.out.println("error while writing offset");
+			}
+
+			try {
 				in = socket.getInputStream();
 			} catch (IOException e) {
 				System.out.println("Can't get socket input stream. ");
 			}
 
 			// Getting File name and size
-			String filename = null;
-			double fileLength = 0;
 
-			DataInputStream d = new DataInputStream(in);
+			din = new DataInputStream(in);
 			try {
-				filename = d.readUTF();
-				fileLength = d.readDouble();
+				filename = din.readUTF();
+				fileLength = din.readLong();
 			} catch (IOException e) {
 				System.out.println("error while reading filename and size");
 			}
@@ -291,26 +327,34 @@ public class UI extends Application {
 			Platform.runLater(() -> Incomming.setText("Receiving: " + receivedzip.getName()));
 
 			try {
-				out = new FileOutputStream(receivedzip);
+				out = new FileOutputStream(receivedzip, true);
 			} catch (FileNotFoundException e) {
 				System.out.println("File not found. ");
 			}
 
 			byte[] bytes = new byte[16000]; // 16 mb buffer
-			double status = 0D;
-			int count = 0;
+
+			int reads = 0;
 			try {
-				while ((count = in.read(bytes)) > 0) {
-					out.write(bytes, 0, count);
-					status += count;
-					UI.indicator = UI.bar = status / fileLength;
+				while ((reads = in.read(bytes)) > 0) {
+					out.write(bytes, 0, reads);
+					offset += reads;
+					UI.indicator = UI.bar = (double) offset / (double) fileLength;
 				}
-				if (receivedzip.getName().endsWith(".zip")) {
+				if (receivedzip.getName().endsWith(".zip") && offset == fileLength) {
 					Platform.runLater(() -> labelDecompress.setText("Decompressing Please Be Petient"));
 					Compress.unzip(receivedzip.getPath(), destpath.getPath(), "");
 					Platform.runLater(() -> labelDecompress.setText("Decompressing DONE"));
 				}
+
 			} catch (IOException e) {
+				try (DataOutputStream d = new DataOutputStream(new FileOutputStream(temp));) {
+					d.writeLong(offset);
+				} catch (FileNotFoundException e1) {
+					System.out.println("temp not found to write offset");
+				} catch (IOException e2) {
+					System.out.println("ioexception duing writing offset");
+				}
 				System.out.println("Error occured in while loop in reading from socket and writing to file");
 			}
 
@@ -319,18 +363,35 @@ public class UI extends Application {
 			UI.bar = 1.0;
 			UI.indicator = 1.0;
 
-			if (socket != null)
-				try {
-					socket.close();
-				} catch (IOException e) {
-					System.out.println("Error while closing socket");
-				}
 			if (serverSocket != null)
 				try {
 					serverSocket.close();
 				} catch (IOException e) {
 					System.out.println("Error while closing ServerSocket");
 				}
+
+			if (socket != null)
+				try {
+					socket.close();
+				} catch (IOException e) {
+					System.out.println("Error while closing socket");
+				}
+
+			if (din != null) {
+				try {
+					din.close();
+				} catch (IOException e) {
+					System.out.println("Error while closing din");
+				}
+			}
+
+			if (dout != null) {
+				try {
+					dout.close();
+				} catch (IOException e) {
+					System.out.println("Error while closing dout");
+				}
+			}
 			if (out != null)
 				try {
 					out.close();
@@ -344,8 +405,13 @@ public class UI extends Application {
 					System.out.println("Error while closing in socket stream");
 				}
 
-			if (receivedzip.getName().endsWith(".zip"))
+			if (temp.exists() && offset == fileLength)
+				temp.delete();
+
+			if (receivedzip.getName().endsWith(".zip") && offset == fileLength) {
 				receivedzip.delete();
+				temp.delete();
+			}
 
 		}
 	}

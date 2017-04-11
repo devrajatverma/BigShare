@@ -1,3 +1,4 @@
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,11 +16,13 @@ public class ClientClass {
 
 	public void send() {
 		Socket socket = null;
-		OutputStream out = null;
-		DataOutputStream d = null;
 		InputStream in = null;
+		OutputStream out = null;
+		DataOutputStream dout = null;
+		DataInputStream din = null;
 		String filename = null;
-		double fileLength = 0;
+		long fileLength = 0;
+		long offset = 0;
 
 		try {
 			try {
@@ -27,22 +30,35 @@ public class ClientClass {
 			} catch (UnknownHostException e) {
 				System.out.println("UnknownHostException Occured");
 			} catch (IOException e) {
-				System.out.println("IOException Occured");
+				System.out.println("IOException Occured during getting Socket");
 			}
+			try {
+				in = socket.getInputStream();
+			} catch (IOException e) {
+				System.out.println("Problem in getting inputStream");
+			}
+			// Reading Offset
+			din = new DataInputStream(in);
+			try {
+				offset = din.readLong();
+			} catch (IOException e1) {
+				System.out.println("Error in Getting offset");
+			}
+
 			try {
 				out = socket.getOutputStream();
 			} catch (IOException e) {
 				System.out.println("Problem in getting outputStream");
 			}
+			dout = new DataOutputStream(out);
 
 			filename = file.getName();
 			fileLength = file.length();
-			// Sending Name and size of the file
 
-			d = new DataOutputStream(out);
+			// Sending Name and size of the file
 			try {
-				d.writeUTF(filename);
-				d.writeDouble(fileLength);
+				dout.writeUTF(filename);
+				dout.writeLong(fileLength);
 			} catch (IOException e) {
 				System.out.println("Error while writing filename and size");
 			}
@@ -53,14 +69,20 @@ public class ClientClass {
 				System.out.println("File Not Found");
 			}
 
-			byte[] bytes = new byte[16000]; // 16 mb Buffer
-			double status = 0L;
-			int count = 0;
 			try {
-				while ((count = in.read(bytes)) > 0) {
-					out.write(bytes, 0, count);
-					status += count;
-					UI.indicatorC = UI.barC = status / fileLength;
+				in.skip(offset);
+			} catch (IOException e1) {
+				System.out.println("Error while skipping already send data");
+			}
+
+			byte[] bytes = new byte[16000]; // 16 mb Buffer
+
+			int reads = 0;
+			try {
+				while ((reads = in.read(bytes)) > 0) {
+					out.write(bytes, 0, reads);
+					offset += reads;
+					UI.indicatorC = UI.barC = (double) offset / (double) fileLength;
 				}
 			} catch (IOException e) {
 				System.out.println("Error during Reading form socket/Writing writing to file in client class");
@@ -78,15 +100,9 @@ public class ClientClass {
 					System.out.println("IOException during closing client socket");
 				}
 
-			if (out != null)
+			if (din != null)
 				try {
-					out.close();
-				} catch (IOException e) {
-					System.out.println("IOException during cloasing out stream");
-				}
-			if (d != null)
-				try {
-					d.close();
+					din.close();
 				} catch (IOException e1) {
 					System.out.println("Error while closing DataOutputStream");
 				}
@@ -98,9 +114,22 @@ public class ClientClass {
 					System.out.println("IOException during closing in stream");
 				}
 
-			if (file.getName().endsWith(".zip"))
-				file.delete();
+			if (dout != null)
+				try {
+					dout.close();
+				} catch (IOException e1) {
+					System.out.println("Error while closing DataOutputStream");
+				}
 
+			if (out != null)
+				try {
+					out.close();
+				} catch (IOException e) {
+					System.out.println("IOException during cloasing out stream");
+				}
+
+			if (file.getName().endsWith(".zip") && offset == fileLength)
+				file.delete();
 		}
 	}
 }
