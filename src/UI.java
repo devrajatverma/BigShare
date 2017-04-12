@@ -324,7 +324,15 @@ public class UI extends Application {
 				System.out.println("error while reading filename and size");
 			}
 
-			receivedzip = new File(destpath.getPath() + "\\" + filename);
+			if (destpath == null) {
+				try {
+					receivedzip = new File(new File("").getCanonicalPath() + "/" + filename);
+				} catch (IOException e) {
+					System.out.println("Error in assigning defalut current path as dest path");
+				}
+			} else
+				receivedzip = new File(destpath.getPath() + "/" + filename);
+
 			Platform.runLater(() -> Incomming.setText("Receiving: " + receivedzip.getName()));
 
 			try {
@@ -360,9 +368,9 @@ public class UI extends Application {
 			}
 
 		} finally {
-			UI.loopControlReceive = false;
 			UI.bar = 1.0;
 			UI.indicator = 1.0;
+			UI.loopControlReceive = false;
 
 			if (serverSocket != null)
 				try {

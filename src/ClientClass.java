@@ -89,9 +89,9 @@ public class ClientClass {
 			}
 
 		} finally {
-			UI.loopControlSend = false;
 			UI.barC = 1.0;
 			UI.indicatorC = 1.0;
+			UI.loopControlSend = false;
 
 			if (socket != null)
 				try {
