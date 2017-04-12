@@ -173,6 +173,7 @@ public class UI extends Application {
 
 			if (sourceDirectory != null) {
 				browseFile.setDisable(true);
+				btnSendNow.setDisable(true);
 				File zip = new File(sourceDirectory.getPath() + ".zip");
 
 				if (!(zip.exists())) {
