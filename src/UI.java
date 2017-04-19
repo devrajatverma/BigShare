@@ -13,6 +13,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
+import java.net.UnknownHostException;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -39,7 +40,7 @@ public class UI extends Application {
 	// -----------UI Fields-----------------------------
 	static double bar = 0, indicator = 0;
 	static double barC = 0, indicatorC = 0;
-	static Boolean loopControlSend = true, loopControlReceive = true;
+	static boolean loopControlSend = true, loopControlReceive = true;
 	Label Incomming, labelDecompress;
 	static Label labelSenderStatus;
 	// ------server fields-----------
@@ -205,10 +206,10 @@ public class UI extends Application {
 
 		Text info = null;
 		try {
-			info = new Text("Local Address " + InetAddress.getLocalHost().getHostAddress().toString()
-					+ " || Global Address " + getIp());
-		} catch (Exception e) {
-			e.printStackTrace();
+			info = new Text("Local Address: " + InetAddress.getLocalHost().getHostAddress().toString()
+					+ " || Global Address: " + getIp());
+		} catch (UnknownHostException e) {
+			info = new Text("Local Address:  || Global Address: ");
 		}
 		info.setFont(new Font(20));
 
@@ -239,13 +240,16 @@ public class UI extends Application {
 
 	}
 
-	public String getIp() throws Exception {
-		URL whatismyip = new URL("http://checkip.amazonaws.com");
+	public String getIp() {
+		URL whatismyip = null;
 		BufferedReader in = null;
 		try {
+			whatismyip = new URL("http://checkip.amazonaws.com");
 			in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
 			String ip = in.readLine();
 			return ip;
+		} catch (Exception e) {
+			return "No Internet";
 		} finally {
 			if (in != null) {
 				try {
