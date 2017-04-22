@@ -44,8 +44,7 @@ public class UI extends Application {
 	Label Incomming, labelDecompress;
 	static Label labelSenderStatus;
 	// ------server fields-----------
-	File destpath;
-	File receivedzip;
+	File destpath, receivedzip;
 
 	@Override
 	public void start(Stage stage) {
@@ -118,7 +117,7 @@ public class UI extends Application {
 			}, "serverBar&IndicatorUpdator");
 			loop2.start();
 
-			new Thread(() -> server(), "activate").start();
+			new Thread(() -> server()).start();
 
 			stage.setScene(receive);
 			stage.show();
@@ -329,11 +328,8 @@ public class UI extends Application {
 			}
 
 			if (destpath == null) {
-				try {
-					receivedzip = new File(new File("").getCanonicalPath() + "/" + filename);
-				} catch (IOException e) {
-					System.out.println("Error in assigning defalut current path as dest path");
-				}
+				destpath = new File("").getAbsoluteFile();
+				receivedzip = new File(destpath.getPath() + "/" + filename);
 			} else
 				receivedzip = new File(destpath.getPath() + "/" + filename);
 
@@ -356,7 +352,8 @@ public class UI extends Application {
 				}
 				if (receivedzip.getName().endsWith(".zip") && offset == fileLength) {
 					Platform.runLater(() -> labelDecompress.setText("Decompressing Please Be Petient"));
-					Compress.unzip(receivedzip.getPath(), destpath.getPath(), "");
+					Compress.unzip(receivedzip.getPath(), destpath.getAbsolutePath(), "");
+
 					Platform.runLater(() -> labelDecompress.setText("Decompressing DONE"));
 				}
 
