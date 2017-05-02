@@ -44,6 +44,7 @@ public class UI extends Application {
 	Label Incomming, labelDecompress;
 	static Label labelSenderStatus;
 	// ------server fields-----------
+	final int port = 8888;
 	File destpath, receivedzip;
 
 	@Override
@@ -117,7 +118,7 @@ public class UI extends Application {
 			}, "serverBar&IndicatorUpdator");
 			loop2.start();
 
-			new Thread(() -> server()).start();
+			new Thread(() -> receiver()).start();
 
 			stage.setScene(receive);
 			stage.show();
@@ -173,7 +174,6 @@ public class UI extends Application {
 
 			if (sourceDirectory != null) {
 				browseFile.setDisable(true);
-				btnSendNow.setDisable(true);
 				File zip = new File(sourceDirectory.getPath() + ".zip");
 
 				if (!(zip.exists())) {
@@ -244,6 +244,7 @@ public class UI extends Application {
 		BufferedReader in = null;
 		try {
 			whatismyip = new URL("http://checkip.amazonaws.com");
+			// http://ipecho.net/plain
 			in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
 			String ip = in.readLine();
 			return ip;
@@ -264,7 +265,7 @@ public class UI extends Application {
 		launch(args);
 	}
 
-	public void server() {
+	public void receiver() {
 		String filename = null;
 		long fileLength = 0;
 		long offset = 0;
@@ -289,7 +290,7 @@ public class UI extends Application {
 
 		try {
 			try {
-				serverSocket = new ServerSocket(8888);
+				serverSocket = new ServerSocket(port);
 			} catch (IOException ex) {
 				System.out.println("Can't setup server on this port number. ");
 			}
@@ -351,7 +352,11 @@ public class UI extends Application {
 					UI.indicator = UI.bar = (double) offset / (double) fileLength;
 				}
 				if (receivedzip.getName().endsWith(".zip") && offset == fileLength) {
-					Platform.runLater(() -> labelDecompress.setText("Decompressing Please Be Petient"));
+					Platform.runLater(() -> {
+						labelDecompress.setText("Decompressing Please Be Petient");
+						Incomming.setText("Received: " + receivedzip.getName());
+					});
+
 					Compress.unzip(receivedzip.getPath(), destpath.getAbsolutePath(), "");
 
 					Platform.runLater(() -> labelDecompress.setText("Decompressing DONE"));
