@@ -9,8 +9,10 @@ import de.javawi.jstun.header.MessageHeader;
 
 class UDPHole {
 	DatagramSocket s;
+	String ip;
+	int port;
 
-	public MappedAddress init() throws Exception {
+	public UDPHole() throws Exception {
 		MessageHeader sendMH = new MessageHeader(MessageHeader.MessageHeaderType.BindingRequest);
 		// sendMH.generateTransactionID();
 
@@ -35,7 +37,8 @@ class UDPHole {
 		MappedAddress ma = (MappedAddress) receiveMH
 				.getMessageAttribute(MessageAttribute.MessageAttributeType.MappedAddress);
 
-		return ma;
+		ip = ma.getAddress().toString();
+		port = ma.getPort();
 
 	}
 }

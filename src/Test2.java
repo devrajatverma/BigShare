@@ -11,19 +11,20 @@ import de.javawi.jstun.util.UtilityException;
 
 public class Test2 {
 
-	public void init(byte[] id)
+	public static void main(String[] args)
 			throws UnknownHostException, IOException, MessageAttributeParsingException, UtilityException {
 		BufferedReader b = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("Enter ip:");
 		String ip = b.readLine();
 		System.out.println("Enter port:");
 		int port = Integer.parseInt(b.readLine());
-		System.out.println(ip + port);
 
 		DatagramSocket s = new DatagramSocket();
-		DatagramPacket p = new DatagramPacket(new byte[1000], 1000, InetAddress.getByName(ip), port);
+		byte[] d = "hello".getBytes();
+		DatagramPacket p = new DatagramPacket(d, d.length, InetAddress.getByName(ip), port);
 
 		s.send(p);
+
 		s.close();
 
 	}
