@@ -9,11 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
-import java.net.UnknownHostException;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -35,6 +33,8 @@ import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import peerdiscovery.Echo;
+import peerdiscovery.Listner;
 
 public class UI extends Application {
 	// -----------UI Fields-----------------------------
@@ -68,9 +68,9 @@ public class UI extends Application {
 
 		ClientClass client = new ClientClass();
 
-		FlowPane rootHome = new FlowPane(10, 10);
+		FlowPane rootHome = new FlowPane(5, 5);
 		rootHome.setAlignment(Pos.CENTER);
-		Scene home = new Scene(rootHome, 560, 270);
+		Scene home = new Scene(rootHome, 550, 290);
 		stage.setScene(home);
 		stage.show();
 
@@ -80,27 +80,38 @@ public class UI extends Application {
 		Separator separatorSend = new Separator();
 		separatorSend.setPrefWidth(480);
 
-		FlowPane rootReceive = new FlowPane();
+		FlowPane rootReceive = new FlowPane(5, 5);
 		rootReceive.setAlignment(Pos.TOP_CENTER);
-		Scene receive = new Scene(rootReceive, 580, 460);
+		Scene receive = new Scene(rootReceive, 580, 470);
 		Separator separatorReceive = new Separator();
 		separatorReceive.setPrefWidth(560);
 
 		InnerShadow innerShadow = new InnerShadow(8.0, Color.AQUA);
 
 		// -----------------home------------------------
-
+		// serverAddtessTaker Belongs to send scene but due to ref put here
+		TextField serverAddressTaker = new TextField();
+		// --------------------------------------------------------------------------
+		Label instructionHome = new Label("Sender Should Proceed First.");
+		instructionHome.setFont(new Font(18));
+		instructionHome.setPrefWidth(560);
+		instructionHome.setAlignment(Pos.CENTER);
+		instructionHome.setTextFill(Color.web("#ff0000"));
 		Button btnSend = new Button("Send Mode", new ImageView("send.png"));
 		btnSend.setEffect(innerShadow);
 		btnSend.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnSend.setOnAction((ae) -> {
-			Thread loop1 = new Thread(() -> {
+			new Thread(() -> {
 				while (loopControlSend) {
 					progressBarClient.setProgress(barC);
 					progressIndicatorClient.setProgress(indicatorC);
 				}
-			}, "clientBar&IndicatorUpdator");
-			loop1.start();
+			}, "clientBar&IndicatorUpdator").start();
+
+			new Thread(() -> {
+				serverAddressTaker.setText(Listner.Listen());
+
+			}).start();
 
 			stage.setScene(send);
 			stage.show();
@@ -110,33 +121,38 @@ public class UI extends Application {
 		btnReceive.setEffect(innerShadow);
 		btnReceive.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnReceive.setOnAction((ae) -> {
-			Thread loop2 = new Thread(() -> {
+			new Thread(() -> {
 				while (loopControlReceive) {
 					progressBarServer.setProgress(bar);
 					progressIndicatorServer.setProgress(indicator);
 				}
-			}, "serverBar&IndicatorUpdator");
-			loop2.start();
+			}, "serverBar&IndicatorUpdator").start();
 
-			new Thread(() -> receiver()).start();
+			new Thread(() -> {
+				Echo.BroadcastIp();
+				receiver();
+			}).start();
 
 			stage.setScene(receive);
 			stage.show();
 
 		});
 
-		rootHome.getChildren().addAll(btnSend, btnReceive);
+		rootHome.getChildren().addAll(instructionHome, btnSend, btnReceive);
 
 		// ------------send-----------
-		Label labelServerAddress = new Label("Enter The Address of RECEIVER (LOCAL IF IN SAME NETWORK): ");
+		Label labelServerAddress = new Label("Enter The Address of RECEIVER If Not in Same Network");
 		labelServerAddress.setFont(new Font(15));
 
-		TextField serverAddressTaker = new TextField("192.168.0.100");
-		serverAddressTaker.setPromptText("Enter The Address ");
+		// TextField serverAddressTaker = new TextField(ip);
+
+		serverAddressTaker.setPromptText("Enter The Address");
 
 		Text instruction = new Text("Either Chose File or Directory");
 		instruction.setFont(new Font(30));
+
 		Label labelPath = new Label();
+
 		labelPath.setFont(new Font(20));
 		labelPath.setPrefSize(520, 0);
 
@@ -204,12 +220,7 @@ public class UI extends Application {
 		// ------------receive-------------------------------------------
 
 		Text info = null;
-		try {
-			info = new Text("Local Address: " + InetAddress.getLocalHost().getHostAddress().toString()
-					+ " || Global Address: " + getIp());
-		} catch (UnknownHostException e) {
-			info = new Text("Local Address:  || Global Address: ");
-		}
+		info = new Text("Public Address: " + getIp());
 		info.setFont(new Font(20));
 
 		Label labelDestinationPath = new Label();
@@ -266,6 +277,7 @@ public class UI extends Application {
 	}
 
 	public void receiver() {
+
 		String filename = null;
 		long fileLength = 0;
 		long offset = 0;
@@ -374,8 +386,8 @@ public class UI extends Application {
 			}
 
 		} finally {
-			UI.bar = 1.0;
-			UI.indicator = 1.0;
+			UI.bar = 1;
+			UI.indicator = 1;
 			UI.loopControlReceive = false;
 
 			if (serverSocket != null)

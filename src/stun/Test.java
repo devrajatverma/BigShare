@@ -1,4 +1,7 @@
+package stun;
+
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 
 public class Test {
 
@@ -6,9 +9,13 @@ public class Test {
 		UDPHole h = new UDPHole();
 		System.out.println(h.ip + "\n" + h.port);
 
+		DatagramSocket soc = new DatagramSocket(8888);
+		soc.setReuseAddress(true);
+
 		DatagramPacket p = new DatagramPacket(new byte[1000], 1000);
-		h.s.receive(p);
-		System.out.println(p.getData().toString());
+		soc.receive(p);
+		System.out.println(new String(p.getData()));
+		soc.close();
 	}
 
 }

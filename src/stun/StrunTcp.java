@@ -1,3 +1,4 @@
+package stun;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +17,7 @@ public class StrunTcp {
 
 	public static void main(String[] args)
 			throws UnknownHostException, IOException, UtilityException, MessageAttributeParsingException {
-		Socket s = new Socket("stun.services.mozilla.com", 3478);
+		Socket s = new Socket("stun1.l.google.com", 19302);
 		OutputStream out = s.getOutputStream();
 		InputStream in = s.getInputStream();
 		MessageHeader sendMH = new MessageHeader(MessageHeader.MessageHeaderType.BindingRequest);
@@ -38,6 +39,7 @@ public class StrunTcp {
 				.getMessageAttribute(MessageAttribute.MessageAttributeType.MappedAddress);
 
 		System.out.println(ma);
+		s.close();
 	}
 
 }

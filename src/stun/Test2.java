@@ -1,3 +1,4 @@
+package stun;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,8 +21,8 @@ public class Test2 {
 		int port = Integer.parseInt(b.readLine());
 
 		DatagramSocket s = new DatagramSocket();
-		byte[] d = "hello".getBytes();
-		DatagramPacket p = new DatagramPacket(d, d.length, InetAddress.getByName(ip), port);
+		byte[] data = "hello".getBytes();
+		DatagramPacket p = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port);
 
 		s.send(p);
 

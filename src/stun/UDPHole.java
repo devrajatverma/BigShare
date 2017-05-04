@@ -1,3 +1,4 @@
+package stun;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -23,12 +24,12 @@ class UDPHole {
 		ChangeRequest changeRequest = new ChangeRequest();
 		sendMH.addMessageAttribute(changeRequest);
 		byte[] data = sendMH.getBytes();
-		s = new DatagramSocket();
+		s = new DatagramSocket(8888);
 		s.setReuseAddress(true);
 		DatagramPacket p = new DatagramPacket(data, data.length, InetAddress.getByName("stun1.l.google.com"), 19302);
 		s.send(p);
 		DatagramPacket rp;
-		rp = new DatagramPacket(new byte[32], 32);
+		rp = new DatagramPacket(new byte[100], 100);
 		s.receive(rp);
 		MessageHeader receiveMH = new MessageHeader(MessageHeader.MessageHeaderType.BindingResponse);
 		// System.out.println(receiveMH.getTransactionID().toString() + "Size:"
@@ -39,6 +40,6 @@ class UDPHole {
 
 		ip = ma.getAddress().toString();
 		port = ma.getPort();
-
+		s.close();
 	}
 }
