@@ -10,7 +10,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class ClientClass {
-
+	final int port = 8888;
 	String host;
 	File file;
 
@@ -26,7 +26,7 @@ public class ClientClass {
 
 		try {
 			try {
-				socket = new Socket(host, 8888);
+				socket = new Socket(host, port);
 			} catch (UnknownHostException e) {
 				System.out.println("UnknownHostException Occured");
 			} catch (IOException e) {
@@ -89,8 +89,8 @@ public class ClientClass {
 			}
 
 		} finally {
-			UI.barC = 1.0;
-			UI.indicatorC = 1.0;
+			UI.barC = 1;
+			UI.indicatorC = 1;
 			UI.loopControlSend = false;
 
 			if (socket != null)

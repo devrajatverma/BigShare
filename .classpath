@@ -3,5 +3,8 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="C:/Users/RAJAT VERMA/Documents/GitHub/BigShare/ExternalLibraries/zip4j_1.3.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/RAJAT VERMA/Documents/GitHub/BigShare/ExternalLibraries/jstun-0.7.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/RAJAT VERMA/Documents/GitHub/BigShare/ExternalLibraries/slf4j-api-1.5.6.jar"/>
+	<classpathentry kind="lib" path="C:/Users/RAJAT VERMA/Documents/GitHub/BigShare/ExternalLibraries/slf4j-jdk14-1.5.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
