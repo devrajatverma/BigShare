@@ -97,7 +97,7 @@ public class UI extends Application {
 		instructionHome.setPrefWidth(560);
 		instructionHome.setAlignment(Pos.CENTER);
 		instructionHome.setTextFill(Color.web("#ff0000"));
-		Button btnSend = new Button("Send Mode", new ImageView("send.png"));
+		Button btnSend = new Button("Send Mode", new ImageView("icons/send.png"));
 		btnSend.setEffect(innerShadow);
 		btnSend.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnSend.setOnAction((ae) -> {
@@ -117,7 +117,7 @@ public class UI extends Application {
 			stage.show();
 		});
 
-		Button btnReceive = new Button("Receive Mode", new ImageView("receive.png"));
+		Button btnReceive = new Button("Receive Mode", new ImageView("icons/receive.png"));
 		btnReceive.setEffect(innerShadow);
 		btnReceive.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnReceive.setOnAction((ae) -> {
@@ -156,7 +156,7 @@ public class UI extends Application {
 		labelPath.setFont(new Font(20));
 		labelPath.setPrefSize(520, 0);
 
-		Button btnSendNow = new Button("Send", new ImageView("Send1.png"));
+		Button btnSendNow = new Button("Send", new ImageView("icons/Send1.png"));
 		btnSendNow.setDisable(true);
 		btnSendNow.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnSendNow.setOnAction((ae) -> {
@@ -168,9 +168,9 @@ public class UI extends Application {
 			}, "Client.send()").start();
 		});
 
-		Button browseFile = new Button("Browse File to be sent", new ImageView("file.png"));
+		Button browseFile = new Button("Browse File to be sent", new ImageView("icons/file.png"));
 		browseFile.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-		Button browseDir = new Button("Browse Directory to be sent", new ImageView("Directory.png"));
+		Button browseDir = new Button("Browse Directory to be sent", new ImageView("icons/Directory.png"));
 		browseDir.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		browseFile.setOnAction((ae) -> {
 			FileChooser fileChoser = new FileChooser();
@@ -231,7 +231,7 @@ public class UI extends Application {
 		decompressing.setFont(new Font(14));
 		decompressing.setPrefSize(580, 20);
 
-		Button btnDestPath = new Button("Browse Destination Directory", new ImageView("search.png"));
+		Button btnDestPath = new Button("Browse Destination Directory", new ImageView("icons/search.png"));
 		btnDestPath.setContentDisplay(ContentDisplay.TOP);
 		btnDestPath.setPrefWidth(340);
 		btnDestPath.setOnAction((ae) -> {
