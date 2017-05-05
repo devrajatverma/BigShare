@@ -9,8 +9,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class ClientClass {
-	final int port = 8888;
+public class Sender {
+	int port = 8888;
 	String host;
 	File file;
 

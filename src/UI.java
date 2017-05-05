@@ -66,7 +66,7 @@ public class UI extends Application {
 		ProgressIndicator progressIndicatorServer = new ProgressIndicator();
 		progressIndicatorServer.setPrefSize(70, 70);
 
-		ClientClass client = new ClientClass();
+		Sender sender = new Sender();
 
 		FlowPane rootHome = new FlowPane(5, 5);
 		rootHome.setAlignment(Pos.CENTER);
@@ -160,11 +160,15 @@ public class UI extends Application {
 		btnSendNow.setDisable(true);
 		btnSendNow.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnSendNow.setOnAction((ae) -> {
-			client.host = serverAddressTaker.getText();
+			sender.host = serverAddressTaker.getText();
 			labelSenderStatus.setText("Sending...");
+			Platform.runLater(() -> btnSendNow.setDisable(true));
 			new Thread(() -> {
-				client.send();
-				Platform.runLater(() -> labelSenderStatus.setText("SENT"));
+				sender.send();
+				Platform.runLater(() -> {
+					labelSenderStatus.setText("SENT");
+					btnSendNow.setDisable(false);
+				});
 			}, "Client.send()").start();
 		});
 
@@ -179,7 +183,7 @@ public class UI extends Application {
 			if (tempfile != null) {
 				btnSendNow.setDisable(false);
 				labelPath.setText(tempfile.getAbsolutePath());
-				client.file = tempfile;
+				sender.file = tempfile;
 				browseDir.setDisable(true);
 			}
 		});
@@ -206,7 +210,7 @@ public class UI extends Application {
 					}, "Compressing").start();
 				}
 
-				client.file = zip;
+				sender.file = zip;
 				btnSendNow.setDisable(false);
 			}
 		});
