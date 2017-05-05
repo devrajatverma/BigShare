@@ -40,11 +40,10 @@ public class UI extends Application {
 	// -----------UI Fields-----------------------------
 	static double bar = 0, indicator = 0;
 	static double barC = 0, indicatorC = 0;
-	static boolean loopControlSend = true, loopControlReceive = true;
 	Label Incomming, labelDecompress;
 	static Label labelSenderStatus;
 	// ------server fields-----------
-	final int port = 8888;
+	static int port = 8888;
 	File destpath, receivedzip;
 
 	@Override
@@ -56,15 +55,15 @@ public class UI extends Application {
 		});
 
 		stage.setResizable(false);
-		stage.setTitle("BIG SHARE By devrajatverma@gmail.com");
-		ProgressBar progressBarClient = new ProgressBar();
-		progressBarClient.setPrefSize(300, 30);
-		ProgressIndicator progressIndicatorClient = new ProgressIndicator();
-		progressIndicatorClient.setPrefSize(70, 70);
-		ProgressBar progressBarServer = new ProgressBar();
-		progressBarServer.setPrefSize(350, 30);
-		ProgressIndicator progressIndicatorServer = new ProgressIndicator();
-		progressIndicatorServer.setPrefSize(70, 70);
+		stage.setTitle("BigShare By devrajatverma@gmail.com");
+		ProgressBar progressBarSender = new ProgressBar();
+		progressBarSender.setPrefSize(300, 30);
+		ProgressIndicator progressIndicatorSender = new ProgressIndicator();
+		progressIndicatorSender.setPrefSize(70, 70);
+		ProgressBar progressBarReceiver = new ProgressBar();
+		progressBarReceiver.setPrefSize(350, 30);
+		ProgressIndicator progressIndicatorReceiver = new ProgressIndicator();
+		progressIndicatorReceiver.setPrefSize(70, 70);
 
 		Sender sender = new Sender();
 
@@ -74,7 +73,7 @@ public class UI extends Application {
 		stage.setScene(home);
 		stage.show();
 
-		FlowPane rootSend = new FlowPane(10, 10);
+		FlowPane rootSend = new FlowPane(5, 5);
 		rootSend.setAlignment(Pos.TOP_CENTER);
 		Scene send = new Scene(rootSend, 520, 380);
 		Separator separatorSend = new Separator();
@@ -91,6 +90,7 @@ public class UI extends Application {
 		// -----------------home------------------------
 		// serverAddtessTaker Belongs to send scene but due to ref put here
 		TextField serverAddressTaker = new TextField();
+		serverAddressTaker.setPrefWidth(200);
 		// --------------------------------------------------------------------------
 		Label instructionHome = new Label("Sender Should Proceed First.");
 		instructionHome.setFont(new Font(18));
@@ -102,9 +102,9 @@ public class UI extends Application {
 		btnSend.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnSend.setOnAction((ae) -> {
 			new Thread(() -> {
-				while (loopControlSend) {
-					progressBarClient.setProgress(barC);
-					progressIndicatorClient.setProgress(indicatorC);
+				while (true) {
+					progressBarSender.setProgress(barC);
+					progressIndicatorSender.setProgress(indicatorC);
 				}
 			}, "clientBar&IndicatorUpdator").start();
 
@@ -122,15 +122,17 @@ public class UI extends Application {
 		btnReceive.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnReceive.setOnAction((ae) -> {
 			new Thread(() -> {
-				while (loopControlReceive) {
-					progressBarServer.setProgress(bar);
-					progressIndicatorServer.setProgress(indicator);
+				while (true) {
+					progressBarReceiver.setProgress(bar);
+					progressIndicatorReceiver.setProgress(indicator);
 				}
 			}, "serverBar&IndicatorUpdator").start();
 
 			new Thread(() -> {
 				Echo.BroadcastIp();
-				receiver();
+				while (true)
+					receiver();
+
 			}).start();
 
 			stage.setScene(receive);
@@ -140,16 +142,10 @@ public class UI extends Application {
 
 		rootHome.getChildren().addAll(instructionHome, btnSend, btnReceive);
 
-		// ------------send-----------
-		Label labelServerAddress = new Label("Enter The Address of RECEIVER If Not in Same Network");
+		// ------------send---------------------------------------------------------------------
+
+		Label labelServerAddress = new Label("Enter The Address of RECEIVER If Not in Same Network: IP:PORT");
 		labelServerAddress.setFont(new Font(15));
-
-		// TextField serverAddressTaker = new TextField(ip);
-
-		serverAddressTaker.setPromptText("Enter The Address");
-
-		Text instruction = new Text("Either Chose File or Directory");
-		instruction.setFont(new Font(30));
 
 		Label labelPath = new Label();
 
@@ -184,7 +180,7 @@ public class UI extends Application {
 				btnSendNow.setDisable(false);
 				labelPath.setText(tempfile.getAbsolutePath());
 				sender.file = tempfile;
-				browseDir.setDisable(true);
+
 			}
 		});
 
@@ -193,7 +189,6 @@ public class UI extends Application {
 			File sourceDirectory = directorychoser.showDialog(stage);
 
 			if (sourceDirectory != null) {
-				browseFile.setDisable(true);
 				File zip = new File(sourceDirectory.getPath() + ".zip");
 
 				if (!(zip.exists())) {
@@ -218,8 +213,8 @@ public class UI extends Application {
 		labelSenderStatus = new Label();
 		labelSenderStatus.setFont(new Font(13));
 		labelSenderStatus.setPrefWidth(520);
-		rootSend.getChildren().addAll(labelServerAddress, serverAddressTaker, separatorSend, instruction, labelPath,
-				browseFile, browseDir, btnSendNow, labelSenderStatus, progressBarClient, progressIndicatorClient);
+		rootSend.getChildren().addAll(labelServerAddress, serverAddressTaker, separatorSend, labelPath, browseFile,
+				browseDir, btnSendNow, labelSenderStatus, progressBarSender, progressIndicatorSender);
 
 		// ------------receive-------------------------------------------
 
@@ -241,7 +236,8 @@ public class UI extends Application {
 		btnDestPath.setOnAction((ae) -> {
 			DirectoryChooser destinationDirectoryChoser = new DirectoryChooser();
 			destpath = destinationDirectoryChoser.showDialog(stage);
-			labelDestinationPath.setText(destpath.getPath());
+			if (destpath != null)
+				labelDestinationPath.setText(destpath.getPath());
 		});
 
 		Incomming = new Label();
@@ -250,7 +246,7 @@ public class UI extends Application {
 		labelDecompress = new Label();
 		labelDecompress.setFont(new Font(25));
 		rootReceive.getChildren().addAll(info, separatorReceive, labelDestinationPath, decompressing, btnDestPath,
-				Incomming, labelDecompress, progressBarServer, progressIndicatorServer);
+				Incomming, labelDecompress, progressBarReceiver, progressIndicatorReceiver);
 
 	}
 
@@ -281,7 +277,6 @@ public class UI extends Application {
 	}
 
 	public void receiver() {
-
 		String filename = null;
 		long fileLength = 0;
 		long offset = 0;
@@ -389,10 +384,11 @@ public class UI extends Application {
 				System.out.println("Error occured in while loop in reading from socket and writing to file");
 			}
 
+			Platform.runLater(() -> Incomming.setText("Recived: " + receivedzip.getName()));
+
 		} finally {
 			UI.bar = 1;
 			UI.indicator = 1;
-			UI.loopControlReceive = false;
 
 			if (serverSocket != null)
 				try {
