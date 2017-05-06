@@ -48,6 +48,7 @@ public class UI extends Application {
 
 	@Override
 	public void start(Stage stage) {
+
 		Platform.setImplicitExit(true);
 		stage.setOnCloseRequest((ae) -> {
 			Platform.exit();
@@ -353,7 +354,7 @@ public class UI extends Application {
 				System.out.println("File not found. ");
 			}
 
-			byte[] bytes = new byte[16000]; // 16 mb buffer
+			byte[] bytes = new byte[65500]; // 16 mb buffer
 
 			int reads = 0;
 			try {

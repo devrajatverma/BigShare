@@ -9,12 +9,12 @@ import de.javawi.jstun.attribute.MappedAddress;
 import de.javawi.jstun.attribute.MessageAttribute;
 import de.javawi.jstun.header.MessageHeader;
 
-class UDPHole {
+class Discover {
 	DatagramSocket s;
 	String ip;
 	int port;
 
-	public UDPHole() throws Exception {
+	public Discover() throws Exception {
 		MessageHeader sendMH = new MessageHeader(MessageHeader.MessageHeaderType.BindingRequest);
 		// sendMH.generateTransactionID();
 
@@ -26,7 +26,7 @@ class UDPHole {
 		sendMH.addMessageAttribute(changeRequest);
 		byte[] data = sendMH.getBytes();
 		s = new DatagramSocket(8888);
-		s.setReuseAddress(true);
+
 		DatagramPacket p = new DatagramPacket(data, data.length, InetAddress.getByName("stun1.l.google.com"), 19302);
 		s.send(p);
 		DatagramPacket rp;

@@ -74,7 +74,7 @@ public class Sender {
 				System.out.println("Error while skipping already send data");
 			}
 
-			byte[] bytes = new byte[16000]; // 16 mb Buffer
+			byte[] bytes = new byte[65500]; // 16 mb Buffer
 
 			int reads = 0;
 			try {
