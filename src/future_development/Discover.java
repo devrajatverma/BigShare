@@ -1,4 +1,4 @@
-package stun;
+package future_development;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -9,10 +9,9 @@ import de.javawi.jstun.attribute.MappedAddress;
 import de.javawi.jstun.attribute.MessageAttribute;
 import de.javawi.jstun.header.MessageHeader;
 
-class Discover {
-	DatagramSocket s;
-	String ip;
-	int port;
+public class Discover {
+	public String ip;
+	public int port;
 
 	public Discover() throws Exception {
 		MessageHeader sendMH = new MessageHeader(MessageHeader.MessageHeaderType.BindingRequest);
@@ -25,12 +24,12 @@ class Discover {
 		ChangeRequest changeRequest = new ChangeRequest();
 		sendMH.addMessageAttribute(changeRequest);
 		byte[] data = sendMH.getBytes();
-		s = new DatagramSocket(8888);
 
+		DatagramSocket s = new DatagramSocket(8888);
 		DatagramPacket p = new DatagramPacket(data, data.length, InetAddress.getByName("stun1.l.google.com"), 19302);
 		s.send(p);
-		DatagramPacket rp;
-		rp = new DatagramPacket(new byte[100], 100);
+
+		DatagramPacket rp = new DatagramPacket(new byte[100], 100);
 		s.receive(rp);
 		MessageHeader receiveMH = new MessageHeader(MessageHeader.MessageHeaderType.BindingResponse);
 		// System.out.println(receiveMH.getTransactionID().toString() + "Size:"

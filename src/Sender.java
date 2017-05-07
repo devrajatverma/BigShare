@@ -74,7 +74,7 @@ public class Sender {
 				System.out.println("Error while skipping already send data");
 			}
 
-			byte[] bytes = new byte[65500]; // 16 mb Buffer
+			byte[] bytes = new byte[1400];
 
 			int reads = 0;
 			try {
@@ -129,5 +129,9 @@ public class Sender {
 			if (file.getName().endsWith(".zip") && offset == fileLength)
 				file.delete();
 		}
+	}
+
+	public void remoteSend() {
+
 	}
 }

@@ -354,7 +354,7 @@ public class UI extends Application {
 				System.out.println("File not found. ");
 			}
 
-			byte[] bytes = new byte[65500]; // 16 mb buffer
+			byte[] bytes = new byte[1400];
 
 			int reads = 0;
 			try {
