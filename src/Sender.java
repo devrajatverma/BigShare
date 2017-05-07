@@ -81,15 +81,15 @@ public class Sender {
 				while ((reads = in.read(bytes)) > 0) {
 					out.write(bytes, 0, reads);
 					offset += reads;
-					UI.indicatorC = UI.barC = (double) offset / (double) fileLength;
+					UI.indicatorSender = UI.barSender = (double) offset / (double) fileLength;
 				}
 			} catch (IOException e) {
 				System.out.println("Error during Reading form socket/Writing writing to file in client class");
 			}
 
 		} finally {
-			UI.barC = 1;
-			UI.indicatorC = 1;
+			UI.barSender = 1;
+			UI.indicatorSender = 1;
 
 			if (socket != null)
 				try {

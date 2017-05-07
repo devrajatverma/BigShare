@@ -1,4 +1,3 @@
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -7,11 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.URL;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -29,7 +26,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -39,8 +35,9 @@ import peerdiscovery.Listner;
 public class UI extends Application {
 	// -----------UI Fields-----------------------------
 	static double bar = 0, indicator = 0;
-	static double barC = 0, indicatorC = 0;
 	Label Incomming, labelDecompress;
+	// sender fields------------------
+	static double barSender = 0, indicatorSender = 0;
 	static Label labelSenderStatus;
 	// ------server fields-----------
 	static int port = 8888;
@@ -58,13 +55,13 @@ public class UI extends Application {
 		stage.setResizable(false);
 		stage.setTitle("BigShare By devrajatverma@gmail.com");
 		ProgressBar progressBarSender = new ProgressBar();
-		progressBarSender.setPrefSize(300, 30);
+		progressBarSender.setPrefSize(500, 30);
 		ProgressIndicator progressIndicatorSender = new ProgressIndicator();
-		progressIndicatorSender.setPrefSize(70, 70);
+		progressIndicatorSender.setPrefSize(80, 80);
 		ProgressBar progressBarReceiver = new ProgressBar();
-		progressBarReceiver.setPrefSize(350, 30);
+		progressBarReceiver.setPrefSize(550, 30);
 		ProgressIndicator progressIndicatorReceiver = new ProgressIndicator();
-		progressIndicatorReceiver.setPrefSize(70, 70);
+		progressIndicatorReceiver.setPrefSize(80, 80);
 
 		Sender sender = new Sender();
 
@@ -74,15 +71,15 @@ public class UI extends Application {
 		stage.setScene(home);
 		stage.show();
 
-		FlowPane rootSend = new FlowPane(5, 5);
+		FlowPane rootSend = new FlowPane(10, 10);
 		rootSend.setAlignment(Pos.TOP_CENTER);
-		Scene send = new Scene(rootSend, 520, 380);
+		Scene send = new Scene(rootSend, 520, 390);
 		Separator separatorSend = new Separator();
 		separatorSend.setPrefWidth(480);
 
-		FlowPane rootReceive = new FlowPane(5, 5);
+		FlowPane rootReceive = new FlowPane(10, 10);
 		rootReceive.setAlignment(Pos.TOP_CENTER);
-		Scene receive = new Scene(rootReceive, 580, 470);
+		Scene receive = new Scene(rootReceive, 580, 480);
 		Separator separatorReceive = new Separator();
 		separatorReceive.setPrefWidth(560);
 
@@ -91,7 +88,8 @@ public class UI extends Application {
 		// -----------------home------------------------
 		// serverAddtessTaker Belongs to send scene but due to ref put here
 		TextField serverAddressTaker = new TextField();
-		serverAddressTaker.setPrefWidth(200);
+		serverAddressTaker.setFont(new Font(15));
+		// serverAddressTaker.setAlignment(Pos.CENTER);
 		// --------------------------------------------------------------------------
 		Label instructionHome = new Label("Sender Should Proceed First.");
 		instructionHome.setFont(new Font(18));
@@ -102,12 +100,16 @@ public class UI extends Application {
 		btnSend.setEffect(innerShadow);
 		btnSend.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnSend.setOnAction((ae) -> {
-			new Thread(() -> {
+
+			Thread t1 = new Thread(() -> {
 				while (true) {
-					progressBarSender.setProgress(barC);
-					progressIndicatorSender.setProgress(indicatorC);
+					progressBarSender.setProgress(barSender);
+					progressIndicatorSender.setProgress(indicatorSender);
 				}
-			}, "clientBar&IndicatorUpdator").start();
+			}, "clientBar&IndicatorUpdator");
+			t1.setPriority(3);
+			t1.setDaemon(true);
+			t1.start();
 
 			new Thread(() -> {
 				serverAddressTaker.setText(Listner.Listen());
@@ -122,12 +124,16 @@ public class UI extends Application {
 		btnReceive.setEffect(innerShadow);
 		btnReceive.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnReceive.setOnAction((ae) -> {
-			new Thread(() -> {
+
+			Thread t2 = new Thread(() -> {
 				while (true) {
 					progressBarReceiver.setProgress(bar);
 					progressIndicatorReceiver.setProgress(indicator);
 				}
-			}, "serverBar&IndicatorUpdator").start();
+			}, "serverBar&IndicatorUpdator");
+			t2.setPriority(3);
+			t2.setDaemon(true);
+			t2.start();
 
 			new Thread(() -> {
 				Echo.BroadcastIp();
@@ -145,11 +151,11 @@ public class UI extends Application {
 
 		// ------------send---------------------------------------------------------------------
 
-		Label labelServerAddress = new Label("Enter The Address of RECEIVER If Not in Same Network: IP:PORT");
-		labelServerAddress.setFont(new Font(15));
+		Label labelServerAddress = new Label("Tell Receiver to Press echo if Following Box is Empty.");
+		labelServerAddress.setFont(new Font(20));
+		labelServerAddress.setAlignment(Pos.CENTER);
 
 		Label labelPath = new Label();
-
 		labelPath.setFont(new Font(20));
 		labelPath.setPrefSize(520, 0);
 
@@ -158,12 +164,12 @@ public class UI extends Application {
 		btnSendNow.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		btnSendNow.setOnAction((ae) -> {
 			sender.host = serverAddressTaker.getText();
-			labelSenderStatus.setText("Sending...");
+			labelSenderStatus.setText("SENDING " + sender.file.getName());
 			Platform.runLater(() -> btnSendNow.setDisable(true));
 			new Thread(() -> {
 				sender.send();
 				Platform.runLater(() -> {
-					labelSenderStatus.setText("SENT");
+					labelSenderStatus.setText("SENT " + sender.file.getName());
 					btnSendNow.setDisable(false);
 				});
 			}, "Client.send()").start();
@@ -171,8 +177,6 @@ public class UI extends Application {
 
 		Button browseFile = new Button("Browse File to be sent", new ImageView("file.png"));
 		browseFile.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-		Button browseDir = new Button("Browse Directory to be sent", new ImageView("Directory.png"));
-		browseDir.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		browseFile.setOnAction((ae) -> {
 			FileChooser fileChoser = new FileChooser();
 			File tempfile = fileChoser.showOpenDialog(stage);
@@ -185,6 +189,8 @@ public class UI extends Application {
 			}
 		});
 
+		Button browseDir = new Button("Browse Directory to be sent", new ImageView("Directory.png"));
+		browseDir.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		browseDir.setOnAction((ae) -> {
 			DirectoryChooser directorychoser = new DirectoryChooser();
 			File sourceDirectory = directorychoser.showDialog(stage);
@@ -195,6 +201,7 @@ public class UI extends Application {
 				if (!(zip.exists())) {
 					new Thread(() -> {
 						Platform.runLater(() -> {
+							btnSendNow.setDisable(true);
 							labelPath.setText("COMPRESSING.... Please Be PETIENT");
 						});
 
@@ -212,16 +219,16 @@ public class UI extends Application {
 		});
 
 		labelSenderStatus = new Label();
-		labelSenderStatus.setFont(new Font(13));
+		labelSenderStatus.setFont(new Font(15));
 		labelSenderStatus.setPrefWidth(520);
 		rootSend.getChildren().addAll(labelServerAddress, serverAddressTaker, separatorSend, labelPath, browseFile,
 				browseDir, btnSendNow, labelSenderStatus, progressBarSender, progressIndicatorSender);
 
 		// ------------receive-------------------------------------------
 
-		Text info = null;
-		info = new Text("Public Address: " + getIp());
-		info.setFont(new Font(20));
+		// Text info = null;
+		// info = new Text("Public Address: " + getIp());
+		// info.setFont(new Font(20));
 
 		Label labelDestinationPath = new Label();
 		labelDestinationPath.setFont(new Font(14));
@@ -241,36 +248,18 @@ public class UI extends Application {
 				labelDestinationPath.setText(destpath.getPath());
 		});
 
+		Button echo = new Button("ECHO", new ImageView("echo.png"));
+		echo.setContentDisplay(ContentDisplay.TOP);
+		echo.setOnAction((ae) -> Echo.BroadcastIp());
+
 		Incomming = new Label();
 		Incomming.setFont(new Font(25));
 		Incomming.setPrefWidth(580);
 		labelDecompress = new Label();
 		labelDecompress.setFont(new Font(25));
-		rootReceive.getChildren().addAll(info, separatorReceive, labelDestinationPath, decompressing, btnDestPath,
-				Incomming, labelDecompress, progressBarReceiver, progressIndicatorReceiver);
+		rootReceive.getChildren().addAll(labelDestinationPath, decompressing, btnDestPath, echo, Incomming,
+				labelDecompress, progressBarReceiver, progressIndicatorReceiver);
 
-	}
-
-	public String getIp() {
-		URL whatismyip = null;
-		BufferedReader in = null;
-		try {
-			whatismyip = new URL("http://checkip.amazonaws.com");
-			// http://ipecho.net/plain
-			in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
-			String ip = in.readLine();
-			return ip;
-		} catch (Exception e) {
-			return "No Internet";
-		} finally {
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 
 	public static void main(String[] args) {
@@ -355,7 +344,6 @@ public class UI extends Application {
 			}
 
 			byte[] bytes = new byte[1400];
-
 			int reads = 0;
 			try {
 				while ((reads = in.read(bytes)) > 0) {
