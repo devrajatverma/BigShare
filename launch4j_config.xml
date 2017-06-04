@@ -2,7 +2,7 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>C:\Users\RAJAT VERMA\Desktop\Big Share.jar</jar>
+  <jar>C:\Users\RAJAT VERMA\Desktop\BigShare.jar</jar>
   <outfile>C:\Users\RAJAT VERMA\Desktop\BigShare.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
@@ -13,7 +13,7 @@
   <stayAlive>false</stayAlive>
   <restartOnCrash>false</restartOnCrash>
   <manifest></manifest>
-  <icon>C:\Users\RAJAT VERMA\Desktop\BigShare.ico</icon>
+  <icon>C:\Users\RAJAT VERMA\Documents\GitHub\BigShare\BigShare.ico</icon>
   <jre>
     <path></path>
     <bundledJre64Bit>false</bundledJre64Bit>

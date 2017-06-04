@@ -105,9 +105,14 @@ public class UI extends Application {
 				while (true) {
 					progressBarSender.setProgress(barSender);
 					progressIndicatorSender.setProgress(indicatorSender);
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}, "clientBar&IndicatorUpdator");
-			t1.setPriority(3);
+			t1.setPriority(1);
 			t1.setDaemon(true);
 			t1.start();
 
@@ -129,9 +134,14 @@ public class UI extends Application {
 				while (true) {
 					progressBarReceiver.setProgress(bar);
 					progressIndicatorReceiver.setProgress(indicator);
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}, "serverBar&IndicatorUpdator");
-			t2.setPriority(3);
+			t2.setPriority(1);
 			t2.setDaemon(true);
 			t2.start();
 
@@ -343,7 +353,7 @@ public class UI extends Application {
 				System.out.println("File not found. ");
 			}
 
-			byte[] bytes = new byte[1400];
+			byte[] bytes = new byte[8192];
 			int reads = 0;
 			try {
 				while ((reads = in.read(bytes)) > 0) {

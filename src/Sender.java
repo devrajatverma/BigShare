@@ -74,8 +74,7 @@ public class Sender {
 				System.out.println("Error while skipping already send data");
 			}
 
-			byte[] bytes = new byte[1400];
-
+			byte[] bytes = new byte[8192];
 			int reads = 0;
 			try {
 				while ((reads = in.read(bytes)) > 0) {
